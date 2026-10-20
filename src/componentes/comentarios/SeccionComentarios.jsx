@@ -1,0 +1,132 @@
+/**
+ * Comentarios de una publicación, con respuestas y actualización en tiempo real.
+ *
+ * Un mismo comentario puede llegar dos veces (respuesta del POST y evento del socket),
+ * por eso se lleva un registro de ids ya vistos.
+ */
+import { useCallback, useRef, useState } from 'react';
+import {
+  crearComentario,
+  editarComentario,
+  eliminarComentario,
+  listarComentarios,
+  listarRespuestas,
+} from '../../api/comentarios.js';
+import { useAvisos } from '../../hooks/useAvisos.js';
+import { useEventoSocket } from '../../hooks/useEventoSocket.js';
+import { usePaginado } from '../../hooks/usePaginado.js';
+import { EVENTOS } from '../../sockets/eventos.js';
+import { Cargando } from '../Cargando.jsx';
+import { MensajeError } from '../MensajeError.jsx';
+import { FormComentario } from './FormComentario.jsx';
+import { ItemComentario } from './ItemComentario.jsx';
+
+export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
+  const { avisar } = useAvisos();
+  const raiz = usePaginado((cursor) => listarComentarios(publicacionId, cursor), publicacionId);
+  const setRaiz = raiz.setItems;
+  const [respuestas, setRespuestas] = useState({}); // { comentarioPadreId: Comentario[] }
+  const vistos = useRef(new Set());
+
+  /** Aplica `cambio` al comentario con ese id, esté en la raíz o entre las respuestas. */
+  const actualizar = useCallback(
+    (id, cambio) => {
+      const aplicar = (lista) => lista.map((c) => (c.id === id ? cambio(c) : c));
+      setRaiz(aplicar);
+      setRespuestas((mapa) =>
+        Object.fromEntries(Object.entries(mapa).map(([padre, lista]) => [padre, aplicar(lista)])),
+      );
+    },
+    [setRaiz],
+  );
+
+  const agregar = useCallback(
+    (comentario) => {
+      if (vistos.current.has(comentario.id)) return;
+      vistos.current.add(comentario.id);
+      alAgregarComentario?.();
+
+      const padre = comentario.comentarioPadreId;
+      if (!padre) {
+        setRaiz((lista) =>
+          lista.some((c) => c.id === comentario.id) ? lista : [...lista, comentario],
+        );
+        return;
+      }
+      setRespuestas((mapa) =>
+        mapa[padre] ? { ...mapa, [padre]: [...mapa[padre], comentario] } : mapa,
+      );
+      actualizar(padre, (c) => ({ ...c, totalRespuestas: (c.totalRespuestas ?? 0) + 1 }));
+    },
+    [setRaiz, actualizar, alAgregarComentario],
+  );
+
+  useEventoSocket(EVENTOS.COMENTARIO_NUEVO, (comentario) => {
+    if (comentario.publicacionId === publicacionId) agregar(comentario);
+  });
+
+  const acciones = {
+    async crear(contenido, comentarioPadreId) {
+      try {
+        agregar(await crearComentario({ publicacionId, contenido, comentarioPadreId }));
+      } catch (e) {
+        avisar(e.message, 'error');
+        throw e;
+      }
+    },
+    async editar(id, contenido) {
+      try {
+        const editado = await editarComentario(id, contenido);
+        actualizar(id, (c) => ({ ...c, ...editado }));
+      } catch (e) {
+        avisar(e.message, 'error');
+        throw e;
+      }
+    },
+    async eliminar(id) {
+      if (!window.confirm('¿Eliminar este comentario?')) return;
+      try {
+        await eliminarComentario(id);
+        actualizar(id, (c) => ({ ...c, eliminado: true, contenido: null }));
+      } catch (e) {
+        avisar(e.message, 'error');
+      }
+    },
+    async cargarRespuestas(id) {
+      try {
+        const { items } = await listarRespuestas(id);
+        items.forEach((c) => vistos.current.add(c.id));
+        setRespuestas((mapa) => ({ ...mapa, [id]: items }));
+      } catch (e) {
+        avisar(e.message, 'error');
+      }
+    },
+  };
+
+  return (
+    <section className="tarjeta">
+      <h2>Comentarios</h2>
+      <FormComentario alEnviar={(texto) => acciones.crear(texto, undefined)} />
+
+      {raiz.items.map((comentario) => (
+        <ItemComentario
+          key={comentario.id}
+          comentario={comentario}
+          respuestas={respuestas}
+          acciones={acciones}
+        />
+      ))}
+
+      {raiz.cargando && <Cargando />}
+      <MensajeError error={raiz.error} />
+      {!raiz.cargando && !raiz.error && raiz.items.length === 0 && (
+        <p className="vacio">Sé el primero en comentar.</p>
+      )}
+      {raiz.hayMas && !raiz.cargando && (
+        <button className="boton-secundario" onClick={raiz.cargarMas}>
+          Ver más comentarios
+        </button>
+      )}
+    </section>
+  );
+}
