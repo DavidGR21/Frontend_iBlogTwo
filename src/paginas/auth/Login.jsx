@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { reenviarVerificacion } from '../../api/auth.js';
+import { CampoAuth, CampoClave, EnlaceGrafiti } from '../../componentes/auth/CampoAuth.jsx';
+import { ICONOS } from '../../componentes/auth/iconos.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
 import { useAvisos } from '../../hooks/useAvisos.js';
 import { useSesion } from '../../hooks/useSesion.js';
@@ -40,46 +42,44 @@ export function Login() {
   }
 
   return (
-    <section className="tarjeta tarjeta-centrada">
-      <h1>Ingresar</h1>
-      <form className="formulario" onSubmit={enviar}>
-        <label>
-          Correo
-          <input
-            type="email"
-            autoComplete="email"
-            value={correo}
-            onChange={(e) => setCorreo(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Contraseña
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={clave}
-            onChange={(e) => setClave(e.target.value)}
-            required
-          />
-        </label>
+    <form className="auth-form" onSubmit={enviar}>
+      <h1 className="auth-titulo">
+        <span className="auth-titulo-a">LOG</span> <span className="auth-titulo-b">IN</span>
+      </h1>
 
-        <MensajeError error={error} />
-        {error?.codigo === 'CORREO_NO_VERIFICADO' && (
-          <button type="button" className="boton-secundario" onClick={reenviar}>
-            Reenviar correo de verificación
-          </button>
-        )}
+      <CampoAuth
+        etiqueta="Correo"
+        icono={ICONOS.usuario}
+        extra={<span className="auth-adorno">{ICONOS.lata}</span>}
+        type="email"
+        autoComplete="email"
+        value={correo}
+        onChange={(e) => setCorreo(e.target.value)}
+        required
+      />
+      <CampoClave
+        etiqueta="Contraseña"
+        autoComplete="current-password"
+        value={clave}
+        onChange={(e) => setClave(e.target.value)}
+        required
+      />
 
-        <button className="boton" disabled={enviando}>
-          {enviando ? 'Ingresando…' : 'Ingresar'}
+      <MensajeError error={error} />
+      {error?.codigo === 'CORREO_NO_VERIFICADO' && (
+        <button type="button" className="auth-secundario" onClick={reenviar}>
+          Reenviar correo de verificación
         </button>
-      </form>
-      <p className="suave">
-        <Link to="/olvide-clave">¿Olvidaste tu contraseña?</Link>
-        <br />
-        ¿No tienes cuenta? <Link to="/registro">Crea una</Link>
-      </p>
-    </section>
+      )}
+
+      <button className="auth-boton" disabled={enviando}>
+        <span>{enviando ? 'Entrando…' : 'Entrar'}</span>
+      </button>
+
+      <nav className="auth-enlaces">
+        <EnlaceGrafiti to="/olvide-clave">Olvidé mi contraseña</EnlaceGrafiti>
+        <EnlaceGrafiti to="/registro">Registrarse</EnlaceGrafiti>
+      </nav>
+    </form>
   );
 }

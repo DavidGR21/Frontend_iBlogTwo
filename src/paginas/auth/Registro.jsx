@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { registrar } from '../../api/auth.js';
 import { ErrorApi } from '../../api/cliente.js';
+import {
+  CampoAuth,
+  CampoClave,
+  EnlaceGrafiti,
+  SelectorAuth,
+} from '../../componentes/auth/CampoAuth.jsx';
+import { ICONOS } from '../../componentes/auth/iconos.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
 import { PAISES } from '../../config.js';
 
@@ -48,96 +54,107 @@ export function Registro() {
 
   if (registrado) {
     return (
-      <section className="tarjeta tarjeta-centrada">
-        <h1>¡Revisa tu correo! 📬</h1>
-        <p>
+      <div className="auth-form">
+        <h1 className="auth-titulo">
+          <span className="auth-titulo-a">¡LISTO!</span>
+        </h1>
+        <p className="auth-texto">
           Te enviamos un enlace a <strong>{datos.correo}</strong> para verificar tu cuenta. Si no lo
-          ves, revisa la carpeta de spam.
+          ves, revisa la carpeta de spam. 📬
         </p>
-        <Link to="/login">Ir a ingresar</Link>
-      </section>
+        <nav className="auth-enlaces auth-enlaces-centro">
+          <EnlaceGrafiti to="/login">Ir a ingresar</EnlaceGrafiti>
+        </nav>
+      </div>
     );
   }
 
   return (
-    <section className="tarjeta tarjeta-centrada">
-      <h1>Crear cuenta</h1>
-      <form className="formulario" onSubmit={enviar}>
-        <label>
-          Nombre de usuario
-          <input
-            value={datos.nombreUsuario}
-            onChange={cambiar('nombreUsuario')}
-            pattern="[A-Za-z0-9_.]{3,30}"
-            title="Entre 3 y 30 caracteres: letras, números, _ o ."
-            autoComplete="username"
-            required
-          />
-        </label>
-        <div className="dos-columnas">
-          <label>
-            Nombres
-            <input value={datos.nombres} onChange={cambiar('nombres')} maxLength={60} required />
-          </label>
-          <label>
-            Apellidos
-            <input value={datos.apellidos} onChange={cambiar('apellidos')} maxLength={60} />
-          </label>
-        </div>
-        <label>
-          País
-          <select value={datos.paisCodigo} onChange={cambiar('paisCodigo')}>
-            <option value="">— Sin especificar —</option>
-            {PAISES.map((pais) => (
-              <option key={pais.codigo} value={pais.codigo}>
-                {pais.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Correo
-          <input
-            type="email"
-            value={datos.correo}
-            onChange={cambiar('correo')}
-            autoComplete="email"
-            required
-          />
-        </label>
-        <div className="dos-columnas">
-          <label>
-            Contraseña
-            <input
-              type="password"
-              value={datos.clave}
-              onChange={cambiar('clave')}
-              minLength={8}
-              maxLength={128}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-          <label>
-            Repetir contraseña
-            <input
-              type="password"
-              value={datos.confirmarClave}
-              onChange={cambiar('confirmarClave')}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-        </div>
+    <form className="auth-form" onSubmit={enviar}>
+      <h1 className="auth-titulo">
+        <span className="auth-titulo-a">SIGN</span> <span className="auth-titulo-b">UP</span>
+      </h1>
 
-        <MensajeError error={error} />
-        <button className="boton" disabled={enviando}>
-          {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
-        </button>
-      </form>
-      <p className="suave">
-        ¿Ya tienes cuenta? <Link to="/login">Ingresa</Link>
-      </p>
-    </section>
+      <CampoAuth
+        etiqueta="Nombre de usuario"
+        icono={ICONOS.arroba}
+        value={datos.nombreUsuario}
+        onChange={cambiar('nombreUsuario')}
+        pattern="[A-Za-z0-9_.]{3,30}"
+        title="Entre 3 y 30 caracteres: letras, números, _ o ."
+        autoComplete="username"
+        required
+      />
+      <div className="auth-fila">
+        <CampoAuth
+          etiqueta="Nombres"
+          icono={ICONOS.usuario}
+          value={datos.nombres}
+          onChange={cambiar('nombres')}
+          maxLength={60}
+          autoComplete="given-name"
+          required
+        />
+        <CampoAuth
+          etiqueta="Apellidos"
+          icono={ICONOS.usuario}
+          value={datos.apellidos}
+          onChange={cambiar('apellidos')}
+          maxLength={60}
+          autoComplete="family-name"
+        />
+      </div>
+      <SelectorAuth
+        etiqueta="País"
+        icono={ICONOS.globo}
+        value={datos.paisCodigo}
+        onChange={cambiar('paisCodigo')}
+      >
+        <option value="">País (opcional)</option>
+        {PAISES.map((pais) => (
+          <option key={pais.codigo} value={pais.codigo}>
+            {pais.nombre}
+          </option>
+        ))}
+      </SelectorAuth>
+      <CampoAuth
+        etiqueta="Correo"
+        icono={ICONOS.correo}
+        type="email"
+        value={datos.correo}
+        onChange={cambiar('correo')}
+        autoComplete="email"
+        required
+      />
+      <div className="auth-fila">
+        <CampoClave
+          etiqueta="Contraseña"
+          value={datos.clave}
+          onChange={cambiar('clave')}
+          minLength={8}
+          maxLength={128}
+          autoComplete="new-password"
+          required
+        />
+        <CampoClave
+          etiqueta="Repetir contraseña"
+          value={datos.confirmarClave}
+          onChange={cambiar('confirmarClave')}
+          autoComplete="new-password"
+          required
+        />
+      </div>
+
+      <MensajeError error={error} />
+      <button className="auth-boton auth-boton-rosa" disabled={enviando}>
+        <span>{enviando ? 'Creando…' : 'Crear cuenta'}</span>
+      </button>
+
+      <nav className="auth-enlaces auth-enlaces-centro">
+        <span>
+          ¿Ya tienes cuenta? <EnlaceGrafiti to="/login">Ingresa</EnlaceGrafiti>
+        </span>
+      </nav>
+    </form>
   );
 }

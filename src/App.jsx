@@ -8,6 +8,7 @@ import { DetallePublicacion } from './paginas/DetallePublicacion.jsx';
 import { Inicio } from './paginas/Inicio.jsx';
 import { Login } from './paginas/auth/Login.jsx';
 import { OlvideClave } from './paginas/auth/OlvideClave.jsx';
+import { PantallaAuth } from './paginas/auth/PantallaAuth.jsx';
 import { Registro } from './paginas/auth/Registro.jsx';
 import { RestablecerClave } from './paginas/auth/RestablecerClave.jsx';
 import { VerificarCorreo } from './paginas/auth/VerificarCorreo.jsx';
@@ -18,17 +19,21 @@ import { Perfil } from './paginas/Perfil.jsx';
 export function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        {/* Solo sin sesión */}
+      {/* Login, registro y recuperar/restablecer contraseña comparten pantalla completa
+          (mascota 3D + transición de grafiti) */}
+      <Route element={<PantallaAuth />}>
         <Route element={<RutaInvitado />}>
           <Route path="login" element={<Login />} />
           <Route path="registro" element={<Registro />} />
           <Route path="olvide-clave" element={<OlvideClave />} />
         </Route>
-
-        {/* Enlaces que llegan por correo: funcionan con o sin sesión */}
-        <Route path="verificar-correo" element={<VerificarCorreo />} />
+        {/* Enlace que llega por correo: funciona con o sin sesión */}
         <Route path="restablecer-clave" element={<RestablecerClave />} />
+      </Route>
+
+      <Route element={<Layout />}>
+        {/* Enlace que llega por correo: funciona con o sin sesión */}
+        <Route path="verificar-correo" element={<VerificarCorreo />} />
 
         {/* Solo con sesión */}
         <Route element={<RutaPrivada />}>

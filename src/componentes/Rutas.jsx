@@ -1,9 +1,9 @@
 /**
  * Guardias de navegación.
  *  - RutaPrivada: solo con sesión; si no, manda al login y recuerda a dónde iba.
- *  - RutaInvitado: solo sin sesión (login, registro); si ya hay sesión, manda al inicio.
+ *  - RutaInvitado: solo sin sesión (login, registro, olvidé mi clave); si ya hay sesión, manda al inicio.
  */
-import { Navigate, Outlet, useLocation } from 'react-router';
+import { Navigate, Outlet, useLocation, useOutletContext } from 'react-router';
 import { useSesion } from '../hooks/useSesion.js';
 import { Cargando } from './Cargando.jsx';
 
@@ -18,8 +18,10 @@ export function RutaPrivada() {
 
 export function RutaInvitado() {
   const { usuario, comprobando } = useSesion();
+  // Reenvía el contexto del padre (p. ej. `cambiarModo` de PantallaAuth) a las rutas hijas
+  const contexto = useOutletContext();
 
   if (comprobando) return <Cargando texto="Comprobando sesión…" />;
   if (usuario) return <Navigate to="/" replace />;
-  return <Outlet />;
+  return <Outlet context={contexto} />;
 }

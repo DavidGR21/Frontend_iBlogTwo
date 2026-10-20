@@ -1,8 +1,9 @@
 /** Destino del enlace del correo: /restablecer-clave?token=… */
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { restablecerClave } from '../../api/auth.js';
 import { ErrorApi } from '../../api/cliente.js';
+import { CampoClave, EnlaceGrafiti } from '../../componentes/auth/CampoAuth.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
 
 export function RestablecerClave() {
@@ -35,52 +36,64 @@ export function RestablecerClave() {
 
   if (!token) {
     return (
-      <section className="tarjeta tarjeta-centrada">
-        <h1>Enlace inválido</h1>
-        <p>Este enlace no es válido. Pide uno nuevo.</p>
-        <Link to="/olvide-clave">Recuperar contraseña</Link>
-      </section>
+      <div className="auth-form">
+        <h1 className="auth-titulo">
+          <span className="auth-titulo-a">¡UPS!</span>
+        </h1>
+        <p className="auth-texto">Este enlace no es válido o le falta algo. Pide uno nuevo.</p>
+        <nav className="auth-enlaces auth-enlaces-centro">
+          <EnlaceGrafiti to="/olvide-clave">Recuperar contraseña</EnlaceGrafiti>
+        </nav>
+      </div>
+    );
+  }
+
+  if (listo) {
+    return (
+      <div className="auth-form">
+        <h1 className="auth-titulo">
+          <span className="auth-titulo-a">¡LISTO!</span>
+        </h1>
+        <p className="auth-texto">Tu contraseña se cambió. Ya puedes ingresar con la nueva. 🔐</p>
+        <nav className="auth-enlaces auth-enlaces-centro">
+          <EnlaceGrafiti to="/login">Ir a ingresar</EnlaceGrafiti>
+        </nav>
+      </div>
     );
   }
 
   return (
-    <section className="tarjeta tarjeta-centrada">
-      <h1>Nueva contraseña</h1>
-      {listo ? (
-        <>
-          <p className="exito">✔ Tu contraseña se cambió. Ya puedes ingresar.</p>
-          <Link to="/login">Ir a ingresar</Link>
-        </>
-      ) : (
-        <form className="formulario" onSubmit={enviar}>
-          <label>
-            Nueva contraseña
-            <input
-              type="password"
-              value={clave}
-              onChange={(e) => setClave(e.target.value)}
-              minLength={8}
-              maxLength={128}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-          <label>
-            Repetir contraseña
-            <input
-              type="password"
-              value={confirmar}
-              onChange={(e) => setConfirmar(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-          <MensajeError error={error} />
-          <button className="boton" disabled={enviando}>
-            {enviando ? 'Guardando…' : 'Guardar contraseña'}
-          </button>
-        </form>
-      )}
-    </section>
+    <form className="auth-form" onSubmit={enviar}>
+      <h1 className="auth-titulo">
+        <span className="auth-titulo-a">NUEVA</span> <span className="auth-titulo-b">CLAVE</span>
+      </h1>
+
+      <CampoClave
+        etiqueta="Nueva contraseña"
+        autoComplete="new-password"
+        minLength={8}
+        maxLength={128}
+        value={clave}
+        onChange={(e) => setClave(e.target.value)}
+        required
+      />
+      <CampoClave
+        etiqueta="Repetir contraseña"
+        autoComplete="new-password"
+        value={confirmar}
+        onChange={(e) => setConfirmar(e.target.value)}
+        required
+      />
+
+      <MensajeError error={error} />
+
+      <button className="auth-boton" disabled={enviando}>
+        <span>{enviando ? 'Guardando…' : 'Guardar clave'}</span>
+      </button>
+
+      <nav className="auth-enlaces auth-enlaces-centro">
+        <EnlaceGrafiti to="/login">Volver a ingresar</EnlaceGrafiti>
+      </nav>
+    </form>
   );
 }
