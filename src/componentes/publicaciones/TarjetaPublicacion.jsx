@@ -8,6 +8,7 @@ import { Link } from 'react-router';
 import { eliminarPublicacion } from '../../api/publicaciones.js';
 import { VISIBILIDADES } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
+import { useConfirmar } from '../../hooks/useConfirmar.js';
 import { useEventoSocket } from '../../hooks/useEventoSocket.js';
 import { useEnPantalla, useSalaPublicacion } from '../../hooks/useSalaPublicacion.js';
 import { useSesion } from '../../hooks/useSesion.js';
@@ -98,6 +99,7 @@ export function TarjetaPublicacion({
 }) {
   const { usuario } = useSesion();
   const { avisar } = useAvisos();
+  const confirmar = useConfirmar();
   const [editando, setEditando] = useState(false);
   const [verComentarios, setVerComentarios] = useState(comentariosAbiertos);
   const tarjeta = useRef(null);
@@ -127,7 +129,13 @@ export function TarjetaPublicacion({
   const lienzo = !editando && estiloLienzo(publicacion);
 
   async function eliminar() {
-    if (!window.confirm('¿Eliminar esta publicación?')) return;
+    const seguro = await confirmar({
+      titulo: '¿Eliminar publicación?',
+      mensaje:
+        'Se borrará la publicación junto con sus imágenes, reacciones y comentarios. No se puede deshacer.',
+      confirmar: 'Eliminar',
+    });
+    if (!seguro) return;
     try {
       await eliminarPublicacion(publicacion.id);
       avisar('Publicación eliminada');

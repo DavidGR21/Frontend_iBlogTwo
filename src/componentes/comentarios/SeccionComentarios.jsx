@@ -16,6 +16,7 @@ import {
 } from '../../api/comentarios.js';
 import { COMENTARIOS_INICIALES, COMENTARIOS_POR_CLIC } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
+import { useConfirmar } from '../../hooks/useConfirmar.js';
 import { useEventoSocket } from '../../hooks/useEventoSocket.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
 import { EVENTOS } from '../../sockets/eventos.js';
@@ -26,6 +27,7 @@ import { ItemComentario } from './ItemComentario.jsx';
 
 export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
   const { avisar } = useAvisos();
+  const confirmar = useConfirmar();
   const raiz = usePaginado(
     (cursor) =>
       listarComentarios(
@@ -95,7 +97,12 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
       }
     },
     async eliminar(id) {
-      if (!window.confirm('¿Eliminar este comentario?')) return;
+      const seguro = await confirmar({
+        titulo: '¿Eliminar comentario?',
+        mensaje: 'El comentario se quitará de la publicación.',
+        confirmar: 'Eliminar',
+      });
+      if (!seguro) return;
       try {
         await eliminarComentario(id);
         actualizar(id, (c) => ({ ...c, eliminado: true, contenido: null }));

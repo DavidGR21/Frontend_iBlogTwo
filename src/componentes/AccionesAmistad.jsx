@@ -8,9 +8,11 @@ import { useNavigate } from 'react-router';
 import { aceptarSolicitud, eliminarAmistad, enviarSolicitud } from '../api/amistades.js';
 import { abrirConversacion } from '../api/conversaciones.js';
 import { useAvisos } from '../hooks/useAvisos.js';
+import { useConfirmar } from '../hooks/useConfirmar.js';
 
 export function AccionesAmistad({ perfil, alCambiar }) {
   const { avisar } = useAvisos();
+  const confirmar = useConfirmar();
   const navegar = useNavigate();
   const [ocupado, setOcupado] = useState(false);
   const amistad = perfil.amistad ?? null;
@@ -39,8 +41,9 @@ export function AccionesAmistad({ perfil, alCambiar }) {
       alCambiar({ ...amistad, estado: 'aceptada' });
     }, `Ahora eres amigo de ${perfil.nombres}`);
 
-  const quitar = (pregunta, mensaje) => {
-    if (pregunta && !window.confirm(pregunta)) return;
+  // `pregunta`: opciones de la ventana de confirmación (null = sin preguntar)
+  const quitar = async (pregunta, mensaje) => {
+    if (pregunta && !(await confirmar(pregunta))) return;
     ejecutar(async () => {
       await eliminarAmistad(amistad.id);
       alCambiar(null);
@@ -101,7 +104,16 @@ export function AccionesAmistad({ perfil, alCambiar }) {
       </button>
       <button
         className="boton-peligro"
-        onClick={() => quitar(`¿Eliminar a ${perfil.nombres} de tus amigos?`, 'Amigo eliminado')}
+        onClick={() =>
+          quitar(
+            {
+              titulo: '¿Eliminar amigo?',
+              mensaje: `${perfil.nombreUsuario} dejará de estar en tu lista de amigos. Podrás volver a enviarle una solicitud.`,
+              confirmar: 'Eliminar',
+            },
+            'Amigo eliminado',
+          )
+        }
         disabled={ocupado}
       >
         Eliminar
