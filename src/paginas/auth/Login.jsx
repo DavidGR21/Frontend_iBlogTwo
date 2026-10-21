@@ -13,7 +13,7 @@ export function Login() {
   const navegar = useNavigate();
   const { state } = useLocation();
 
-  const [correo, setCorreo] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [clave, setClave] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState(null);
@@ -23,7 +23,7 @@ export function Login() {
     setEnviando(true);
     setError(null);
     try {
-      await iniciarSesion(correo, clave);
+      await iniciarSesion(identificador.trim(), clave);
       navegar(state?.desde ?? '/', { replace: true });
     } catch (e) {
       setError(e);
@@ -34,7 +34,7 @@ export function Login() {
 
   async function reenviar() {
     try {
-      await reenviarVerificacion(correo);
+      await reenviarVerificacion(identificador.trim());
       avisar('Te reenviamos el correo de verificación');
     } catch (e) {
       avisar(e.message, 'error');
@@ -48,13 +48,15 @@ export function Login() {
       </h1>
 
       <CampoAuth
-        etiqueta="Correo"
+        etiqueta="Usuario o correo"
         icono={ICONOS.usuario}
         extra={<span className="auth-adorno">{ICONOS.lata}</span>}
-        type="email"
-        autoComplete="email"
-        value={correo}
-        onChange={(e) => setCorreo(e.target.value)}
+        type="text"
+        autoComplete="username"
+        autoCapitalize="none"
+        spellCheck={false}
+        value={identificador}
+        onChange={(e) => setIdentificador(e.target.value)}
         required
       />
       <CampoClave
@@ -66,7 +68,8 @@ export function Login() {
       />
 
       <MensajeError error={error} />
-      {error?.codigo === 'CORREO_NO_VERIFICADO' && (
+      {/* El reenvío necesita el correo: solo se ofrece si entró con él */}
+      {error?.codigo === 'CORREO_NO_VERIFICADO' && identificador.includes('@') && (
         <button type="button" className="auth-secundario" onClick={reenviar}>
           Reenviar correo de verificación
         </button>

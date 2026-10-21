@@ -1,4 +1,4 @@
-/** Amigos, solicitudes recibidas y enviadas, y buscador por nombre de usuario. */
+/** Amigos, solicitudes recibidas y enviadas, y el mismo buscador de personas del inicio. */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import {
@@ -10,8 +10,16 @@ import {
 import { abrirConversacion } from '../api/conversaciones.js';
 import { Avatar } from '../componentes/Avatar.jsx';
 import { Cargando } from '../componentes/Cargando.jsx';
+import {
+  IconoBorrar,
+  IconoCerrar,
+  IconoCheck,
+  IconoComentario,
+} from '../componentes/iconos/Iconos.jsx';
+import { BuscadorPersonas } from '../componentes/inicio/BuscadorPersonas.jsx';
 import { MensajeError } from '../componentes/MensajeError.jsx';
 import { useAvisos } from '../hooks/useAvisos.js';
+import { useConfirmar } from '../hooks/useConfirmar.js';
 import { useDatos } from '../hooks/useDatos.js';
 import { useEventoSocket } from '../hooks/useEventoSocket.js';
 import { EVENTOS } from '../sockets/eventos.js';
@@ -25,9 +33,9 @@ const PESTANAS = [
 
 export function Amigos() {
   const { avisar } = useAvisos();
+  const confirmar = useConfirmar();
   const navegar = useNavigate();
   const [pestana, setPestana] = useState('amigos');
-  const [busqueda, setBusqueda] = useState('');
 
   const { datos, cargando, error, recargar, setDatos } = useDatos(
     () => (pestana === 'amigos' ? listarAmigos() : listarSolicitudes(pestana)),
@@ -62,8 +70,9 @@ export function Amigos() {
       `Ahora eres amigo de ${nombreCompleto(item.usuario)}`,
     );
 
-  const eliminar = (item, pregunta, mensaje) => {
-    if (pregunta && !window.confirm(pregunta)) return;
+  // `pregunta`: opciones de la ventana de confirmación (null = sin preguntar)
+  const eliminar = async (item, pregunta, mensaje) => {
+    if (pregunta && !(await confirmar(pregunta))) return;
     ejecutar(async () => {
       await eliminarAmistad(item.id);
       quitarDeLista(item.id);
@@ -76,27 +85,22 @@ export function Amigos() {
       navegar(`/mensajes/${conversacion.id}`);
     });
 
-  function buscar(evento) {
-    evento.preventDefault();
-    const nombre = busqueda.trim().replace(/^@/, '');
-    if (nombre) navegar(`/u/${nombre}`);
-  }
+  const vacio = {
+    amigos: 'Todavía no tienes amigos. ¡Búscalos arriba!',
+    recibidas: 'No tienes solicitudes pendientes.',
+    enviadas: 'No has enviado solicitudes.',
+  }[pestana];
 
   return (
     <>
-      <form className="tarjeta fila" onSubmit={buscar}>
-        <input
-          placeholder="Buscar por nombre de usuario, ej. @david"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-        <button className="boton">Buscar</button>
-      </form>
+      <BuscadorPersonas className="amigos-buscador" />
 
-      <div className="pestanas">
+      <div className="pestanas" role="tablist">
         {PESTANAS.map((p) => (
           <button
             key={p.valor}
+            role="tab"
+            aria-selected={pestana === p.valor}
             className={pestana === p.valor ? 'activa' : ''}
             onClick={() => setPestana(p.valor)}
           >
@@ -105,66 +109,75 @@ export function Amigos() {
         ))}
       </div>
 
-      <section className="tarjeta">
+      <section className="tarjeta lista-amigos">
         {cargando && <Cargando />}
         <MensajeError error={error} alReintentar={recargar} />
-        {!cargando && datos?.items.length === 0 && <p className="vacio">No hay nada por aquí.</p>}
+        {!cargando && datos?.items.length === 0 && <p className="vacio">{vacio}</p>}
 
         {!cargando && datos?.items.length > 0 && (
           <ul className="lista-personas">
             {datos.items.map((item) => (
-              <li key={item.id}>
-                <Link to={`/u/${item.usuario.nombreUsuario}`} className="autor">
-                  <Avatar usuario={item.usuario} />
+              <li key={item.id} className="persona">
+                <Link to={`/u/${item.usuario.nombreUsuario}`} className="autor persona-info">
+                  <Avatar usuario={item.usuario} tamano={48} />
                   <span>
-                    <strong>{nombreCompleto(item.usuario)}</strong>
+                    <strong>{item.usuario.nombreUsuario}</strong>
                     <span className="suave">
-                      @{item.usuario.nombreUsuario}
+                      {nombreCompleto(item.usuario)}
                       {(item.desde ?? item.creadaEn) &&
                         ` · ${haceCuanto(item.desde ?? item.creadaEn)}`}
                     </span>
                   </span>
                 </Link>
 
-                <div className="fila">
+                <div className="persona-acciones">
                   {pestana === 'amigos' && (
                     <>
-                      <button className="boton" onClick={() => escribir(item)}>
-                        💬 Mensaje
+                      <button className="accion accion-principal" onClick={() => escribir(item)}>
+                        <IconoComentario tamano={18} />
+                        <span>Mensaje</span>
                       </button>
                       <button
-                        className="boton-peligro"
+                        className="accion accion-peligro"
                         onClick={() =>
                           eliminar(
                             item,
-                            `¿Eliminar a ${nombreCompleto(item.usuario)} de tus amigos?`,
+                            {
+                              titulo: '¿Eliminar amigo?',
+                              mensaje: `${item.usuario.nombreUsuario} dejará de estar en tu lista de amigos. Podrás volver a enviarle una solicitud.`,
+                              confirmar: 'Eliminar',
+                            },
                             'Amigo eliminado',
                           )
                         }
                       >
-                        Eliminar
+                        <IconoBorrar tamano={18} />
+                        <span>Eliminar</span>
                       </button>
                     </>
                   )}
                   {pestana === 'recibidas' && (
                     <>
-                      <button className="boton" onClick={() => aceptar(item)}>
-                        Aceptar
+                      <button className="accion accion-principal" onClick={() => aceptar(item)}>
+                        <IconoCheck tamano={18} />
+                        <span>Aceptar</span>
                       </button>
                       <button
-                        className="boton-secundario"
+                        className="accion"
                         onClick={() => eliminar(item, null, 'Solicitud rechazada')}
                       >
-                        Rechazar
+                        <IconoCerrar tamano={18} />
+                        <span>Rechazar</span>
                       </button>
                     </>
                   )}
                   {pestana === 'enviadas' && (
                     <button
-                      className="boton-secundario"
+                      className="accion"
                       onClick={() => eliminar(item, null, 'Solicitud cancelada')}
                     >
-                      Cancelar
+                      <IconoCerrar tamano={18} />
+                      <span>Cancelar solicitud</span>
                     </button>
                   )}
                 </div>

@@ -5,6 +5,7 @@
  */
 import { lazy, Suspense, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
+import { Logo } from '../../componentes/Logo.jsx';
 import { Salpicaduras } from '../../componentes/auth/Salpicaduras.jsx';
 import { TransicionGrafiti } from '../../componentes/auth/TransicionGrafiti.jsx';
 import '../../estilos/auth.css';
@@ -101,8 +102,8 @@ export function PantallaAuth() {
         <Suspense fallback={null}>
           <Mascota3D alAparecer={alAparecer} />
         </Suspense>
-        <Link to="/login" className="auth-marca">
-          iBlog
+        <Link to="/login" className="auth-marca" aria-label="iBlogTwo">
+          <Logo />
         </Link>
         {mascotaLista && (
           <p key={mensaje} className="auth-burbuja" aria-hidden="true">

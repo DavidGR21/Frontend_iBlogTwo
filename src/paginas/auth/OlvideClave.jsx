@@ -44,7 +44,8 @@ export function OlvideClave() {
   return (
     <form className="auth-form" onSubmit={enviar}>
       <h1 className="auth-titulo">
-        <span className="auth-titulo-a">OLVIDÉ</span> <span className="auth-titulo-b">MI&nbsp;CLAVE</span>
+        <span className="auth-titulo-a">OLVIDÉ</span>{' '}
+        <span className="auth-titulo-b">MI&nbsp;CLAVE</span>
       </h1>
       <p className="auth-texto">Escribe el correo de tu cuenta y te mandamos un enlace.</p>
 
