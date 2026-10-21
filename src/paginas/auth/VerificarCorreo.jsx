@@ -4,6 +4,7 @@ import { verificarCorreo } from '../../api/auth.js';
 import { Cargando } from '../../componentes/Cargando.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
 import { useDatos } from '../../hooks/useDatos.js';
+import { IconoCheck } from '../../componentes/iconos/Iconos.jsx';
 
 // Un token solo se puede usar una vez. En desarrollo, StrictMode monta la página
 // dos veces: guardamos la promesa para no enviar el mismo token dos veces.
@@ -27,7 +28,11 @@ export function VerificarCorreo() {
       <h1>Verificación de correo</h1>
       {cargando && <Cargando texto="Verificando…" />}
       {error && <MensajeError error={error} />}
-      {datos && <p className="exito">✔ {datos.mensaje ?? 'Tu correo quedó verificado.'}</p>}
+      {datos && (
+        <p className="exito con-icono">
+          <IconoCheck tamano={18} /> {datos.mensaje ?? 'Tu correo quedó verificado.'}
+        </p>
+      )}
       {!cargando && <Link to="/login">Ir a ingresar</Link>}
     </section>
   );

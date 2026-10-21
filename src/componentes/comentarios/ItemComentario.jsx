@@ -8,6 +8,7 @@ import { useSesion } from '../../hooks/useSesion.js';
 import { fechaCompleta, haceCuanto } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
 import { FormComentario } from './FormComentario.jsx';
+import { IconoRespuesta } from '../iconos/Iconos.jsx';
 
 const MAX_NIVEL_VISUAL = 4; // a partir de aquí ya no se indenta más
 
@@ -32,7 +33,7 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
 
   return (
     <div className="comentario">
-      <Avatar usuario={comentario.autor} tamano={32} />
+      <Avatar usuario={comentario.autor} tamano={32} ampliable />
       <div className="comentario-cuerpo">
         <div className="comentario-burbuja">
           <Link to={`/u/${comentario.autor.nombreUsuario}`} className="comentario-autor">
@@ -81,10 +82,10 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
 
         {faltanPorCargar && (
           <button
-            className="comentario-ver-respuestas"
+            className="comentario-ver-respuestas con-icono"
             onClick={() => acciones.cargarRespuestas(comentario.id)}
           >
-            ↳ Ver {comentario.totalRespuestas} respuesta
+            <IconoRespuesta tamano={16} /> Ver {comentario.totalRespuestas} respuesta
             {comentario.totalRespuestas === 1 ? '' : 's'}
           </button>
         )}

@@ -602,3 +602,51 @@ button:disabled {
     height: 70vh;
   }
 }
+
+/* ── Iconos junto a texto ─────────────────────── */
+.con-icono {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.con-icono > .icono,
+.aviso > .icono {
+  flex-shrink: 0;
+}
+.icono-en-linea {
+  display: inline-block;
+  vertical-align: -0.2em;
+}
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.aviso-exito > .icono {
+  color: var(--exito);
+}
+.aviso-error > .icono {
+  color: var(--peligro);
+}
+
+/* Foto de perfil que se abre en grande (perfil y ajustes) */
+.avatar-ampliable {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: zoom-in;
+  transition:
+    transform 0.15s,
+    filter 0.15s;
+}
+.avatar-ampliable:hover {
+  transform: scale(1.04);
+  filter: brightness(1.08);
+}
+.avatar-ampliable:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 3px;
+}

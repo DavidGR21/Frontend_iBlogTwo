@@ -5,6 +5,7 @@ import { restablecerClave } from '../../api/auth.js';
 import { ErrorApi } from '../../api/cliente.js';
 import { CampoClave, EnlaceGrafiti } from '../../componentes/auth/CampoAuth.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
+import { IconoCandado } from '../../componentes/iconos/Iconos.jsx';
 
 export function RestablecerClave() {
   const [parametros] = useSearchParams();
@@ -54,7 +55,10 @@ export function RestablecerClave() {
         <h1 className="auth-titulo">
           <span className="auth-titulo-a">¡LISTO!</span>
         </h1>
-        <p className="auth-texto">Tu contraseña se cambió. Ya puedes ingresar con la nueva. 🔐</p>
+        <p className="auth-texto">
+          Tu contraseña se cambió. Ya puedes ingresar con la nueva.{' '}
+          <IconoCandado tamano={18} className="icono-en-linea" />
+        </p>
         <nav className="auth-enlaces auth-enlaces-centro">
           <EnlaceGrafiti to="/login">Ir a ingresar</EnlaceGrafiti>
         </nav>

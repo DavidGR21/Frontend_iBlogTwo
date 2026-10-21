@@ -61,7 +61,7 @@ export function VisorImagenes({ imagenes, inicial = 0, alCerrar }) {
       className="visor"
       role="dialog"
       aria-modal="true"
-      aria-label={`Imagen ${indice + 1} de ${total}`}
+      aria-label={imagen.descripcion ?? `Imagen ${indice + 1} de ${total}`}
       onClick={(e) => e.target === e.currentTarget && alCerrar()}
       onPointerDown={(e) => {
         toque.current = e.pointerType === 'mouse' ? null : e.clientX;
@@ -106,7 +106,7 @@ export function VisorImagenes({ imagenes, inicial = 0, alCerrar }) {
         className="visor-imagen"
         style={{ '--desde': `${direccion * 40}px` }}
         src={imagen.url}
-        alt={`Imagen ${indice + 1} de ${total}`}
+        alt={imagen.descripcion ?? `Imagen ${indice + 1} de ${total}`}
         draggable={false}
       />
 

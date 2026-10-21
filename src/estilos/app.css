@@ -1289,7 +1289,12 @@ body:has(.app) {
   animation: previa-latido 0.9s ease-in-out infinite;
 }
 .previa.subida::after {
-  content: '✓';
+  /* Palomita dibujada en SVG (mismo trazo que IconoCheck) */
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23120c1f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  background-size: 13px;
+  background-position: center;
+  background-repeat: no-repeat;
   position: absolute;
   right: 5px;
   bottom: 5px;

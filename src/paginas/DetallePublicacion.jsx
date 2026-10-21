@@ -11,6 +11,7 @@ import { TarjetaPublicacion } from '../componentes/publicaciones/TarjetaPublicac
 import { useDatos } from '../hooks/useDatos.js';
 import { useEventoSocket } from '../hooks/useEventoSocket.js';
 import { EVENTOS } from '../sockets/eventos.js';
+import { IconoFlechaIzquierda } from '../componentes/iconos/Iconos.jsx';
 
 export function DetallePublicacion() {
   const { id } = useParams();
@@ -33,7 +34,9 @@ export function DetallePublicacion() {
   return (
     <>
       <p>
-        <Link to="/">← Volver</Link>
+        <Link to="/" className="con-icono">
+          <IconoFlechaIzquierda tamano={16} /> Volver
+        </Link>
       </p>
       <TarjetaPublicacion
         publicacion={publicacion}

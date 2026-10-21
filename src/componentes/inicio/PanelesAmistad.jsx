@@ -12,6 +12,7 @@ import { Avatar } from '../Avatar.jsx';
 import { Cargando } from '../Cargando.jsx';
 import { MensajeError } from '../MensajeError.jsx';
 import { BuscadorPersonas } from './BuscadorPersonas.jsx';
+import { IconoFlechaDerecha } from '../iconos/Iconos.jsx';
 
 const MAX_AMIGOS = 6;
 
@@ -48,8 +49,8 @@ export function PanelesAmistad() {
             ))}
           </ul>
         )}
-        <Link to="/amigos" className="panel-pie">
-          Ver todos →
+        <Link to="/amigos" className="panel-pie con-icono">
+          Ver todos <IconoFlechaDerecha tamano={16} />
         </Link>
       </section>
     </>

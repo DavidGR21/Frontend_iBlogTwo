@@ -12,6 +12,7 @@ import { useDatos } from '../hooks/useDatos.js';
 import { usePaginado } from '../hooks/usePaginado.js';
 import { useSesion } from '../hooks/useSesion.js';
 import { fechaCompleta, nombreCompleto } from '../utils/formato.js';
+import { IconoEditar } from '../componentes/iconos/Iconos.jsx';
 
 export function Perfil() {
   const { nombreUsuario } = useParams();
@@ -34,7 +35,7 @@ export function Perfil() {
     <>
       <section className="tarjeta">
         <div className="perfil-cabecera">
-          <Avatar usuario={perfil} tamano={88} />
+          <Avatar usuario={perfil} tamano={88} ampliable />
           <div style={{ flex: 1 }}>
             <h1>{nombreCompleto(perfil)}</h1>
             <p className="suave" style={{ margin: 0 }}>
@@ -50,8 +51,8 @@ export function Perfil() {
 
         <div style={{ marginTop: '0.75rem' }}>
           {esYo ? (
-            <Link to="/ajustes" className="boton-secundario">
-              ✏️ Editar perfil
+            <Link to="/ajustes" className="boton-secundario con-icono">
+              <IconoEditar tamano={17} /> Editar perfil
             </Link>
           ) : (
             <AccionesAmistad

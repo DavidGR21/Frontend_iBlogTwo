@@ -17,6 +17,7 @@ import { hora } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
 import { Cargando } from '../Cargando.jsx';
 import { MensajeError } from '../MensajeError.jsx';
+import { IconoFlechaArriba } from '../iconos/Iconos.jsx';
 
 const ESPERA_ACK_MS = 10_000;
 const INTERVALO_ESCRIBIENDO_MS = 2_000;
@@ -159,8 +160,8 @@ export function PanelChat({ conversacion, alLeer }) {
 
       <div className="chat-mensajes" ref={contenedor}>
         {historial.hayMas && !historial.cargando && (
-          <button className="boton-enlace" onClick={historial.cargarMas}>
-            ↑ Cargar mensajes anteriores
+          <button className="boton-enlace con-icono" onClick={historial.cargarMas}>
+            <IconoFlechaArriba tamano={16} /> Cargar mensajes anteriores
           </button>
         )}
         {historial.cargando && <Cargando />}

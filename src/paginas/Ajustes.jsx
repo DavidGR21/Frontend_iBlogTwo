@@ -89,7 +89,7 @@ function FormAjustes({ yo, alGuardar }) {
       <h1>Ajustes del perfil</h1>
 
       <div className="fila" style={{ marginBottom: '1rem' }}>
-        <Avatar usuario={yo} tamano={72} />
+        <Avatar usuario={yo} tamano={72} ampliable />
         <div>
           <button
             className="boton-secundario"

@@ -10,6 +10,7 @@ import { abrirConversacion } from '../api/conversaciones.js';
 import { useAvisos } from '../hooks/useAvisos.js';
 import { useConfirmar } from '../hooks/useConfirmar.js';
 import { useNotificaciones } from '../hooks/useNotificaciones.js';
+import { IconoAgregarAmigo, IconoCheck, IconoComentario } from './iconos/Iconos.jsx';
 
 export function AccionesAmistad({ perfil, alCambiar }) {
   const { avisar } = useAvisos();
@@ -62,8 +63,8 @@ export function AccionesAmistad({ perfil, alCambiar }) {
 
   if (!amistad) {
     return (
-      <button className="boton" onClick={agregar} disabled={ocupado}>
-        ➕ Agregar amigo
+      <button className="boton con-icono" onClick={agregar} disabled={ocupado}>
+        <IconoAgregarAmigo tamano={18} /> Agregar amigo
       </button>
     );
   }
@@ -102,9 +103,11 @@ export function AccionesAmistad({ perfil, alCambiar }) {
 
   return (
     <div className="fila">
-      <span className="exito">✔ Amigos</span>
-      <button className="boton" onClick={enviarMensaje} disabled={ocupado}>
-        💬 Mensaje
+      <span className="exito con-icono">
+        <IconoCheck tamano={18} /> Amigos
+      </span>
+      <button className="boton con-icono" onClick={enviarMensaje} disabled={ocupado}>
+        <IconoComentario tamano={18} /> Mensaje
       </button>
       <button
         className="boton-peligro"

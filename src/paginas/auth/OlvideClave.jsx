@@ -3,6 +3,7 @@ import { olvideClave } from '../../api/auth.js';
 import { CampoAuth, EnlaceGrafiti } from '../../componentes/auth/CampoAuth.jsx';
 import { ICONOS } from '../../componentes/auth/iconos.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
+import { IconoCorreo } from '../../componentes/iconos/Iconos.jsx';
 
 export function OlvideClave() {
   const [correo, setCorreo] = useState('');
@@ -32,7 +33,8 @@ export function OlvideClave() {
         </h1>
         <p className="auth-texto">
           Si existe una cuenta con <strong>{correo}</strong>, te llegará un enlace para crear una
-          contraseña nueva. Si no lo ves, revisa la carpeta de spam. 📬
+          contraseña nueva. Si no lo ves, revisa la carpeta de spam.{' '}
+          <IconoCorreo tamano={18} className="icono-en-linea" />
         </p>
         <nav className="auth-enlaces auth-enlaces-centro">
           <EnlaceGrafiti to="/login">Volver a ingresar</EnlaceGrafiti>

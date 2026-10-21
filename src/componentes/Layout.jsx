@@ -19,6 +19,7 @@ import { nombreCompleto } from '../utils/formato.js';
 import { Avatar } from './Avatar.jsx';
 import { FondoCalle } from './FondoCalle.jsx';
 import {
+  IconoAgregarAmigo,
   IconoAjustes,
   IconoAmigos,
   IconoCerrar,
@@ -64,16 +65,20 @@ export function Layout() {
   const barra = useRef(null);
 
   useEventoSocket(EVENTOS.AMISTAD_SOLICITUD, (solicitud) => {
-    avisar(`👋 ${nombreCompleto(solicitud.usuario)} te envió una solicitud de amistad`);
+    avisar(
+      `${nombreCompleto(solicitud.usuario)} te envió una solicitud de amistad`,
+      'exito',
+      IconoAgregarAmigo,
+    );
   });
 
   useEventoSocket(EVENTOS.AMISTAD_ACEPTADA, (amistad) => {
-    avisar(`🤝 ${nombreCompleto(amistad.usuario)} aceptó tu solicitud`);
+    avisar(`${nombreCompleto(amistad.usuario)} aceptó tu solicitud`, 'exito', IconoAmigos);
   });
 
   useEventoSocket(EVENTOS.MENSAJE_NUEVO, (mensaje) => {
     if (mensaje.remitenteId !== usuario?.id && !pathname.startsWith('/mensajes')) {
-      avisar('💬 Tienes un mensaje nuevo');
+      avisar('Tienes un mensaje nuevo', 'exito', IconoComentario);
     }
   });
 

@@ -9,7 +9,12 @@ import { NavLink, useParams } from 'react-router';
 import { listarConversaciones } from '../api/conversaciones.js';
 import { Avatar } from '../componentes/Avatar.jsx';
 import { Cargando } from '../componentes/Cargando.jsx';
-import { IconoBuscar, IconoCerrar, IconoConversaciones } from '../componentes/iconos/Iconos.jsx';
+import {
+  IconoBuscar,
+  IconoCerrar,
+  IconoConversaciones,
+  IconoImagen,
+} from '../componentes/iconos/Iconos.jsx';
 import { PanelChat } from '../componentes/mensajes/PanelChat.jsx';
 import { MensajeError } from '../componentes/MensajeError.jsx';
 import { useDatos } from '../hooks/useDatos.js';
@@ -130,9 +135,18 @@ export function Mensajes() {
                 <span className="resumen">
                   <strong>{c.otroUsuario.nombreUsuario}</strong>
                   <span className="suave">
-                    {c.ultimoMensaje
-                      ? `${c.ultimoMensaje.remitenteId === usuario.id ? 'Tú: ' : ''}${c.ultimoMensaje.contenido ?? '🖼️ Imagen'}`
-                      : 'Sin mensajes'}
+                    {c.ultimoMensaje ? (
+                      <>
+                        {c.ultimoMensaje.remitenteId === usuario.id && 'Tú: '}
+                        {c.ultimoMensaje.contenido ?? (
+                          <span className="con-icono">
+                            <IconoImagen tamano={15} /> Imagen
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      'Sin mensajes'
+                    )}
                   </span>
                 </span>
                 {c.noLeidos > 0 && <span className="insignia">{c.noLeidos}</span>}

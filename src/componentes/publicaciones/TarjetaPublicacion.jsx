@@ -148,9 +148,10 @@ export function TarjetaPublicacion({
   return (
     <article className="tarjeta post" ref={tarjeta}>
       <header className="post-cabecera">
-        <Link to={`/u/${autor.nombreUsuario}`} className="post-avatar">
-          <Avatar usuario={autor} tamano={40} />
-        </Link>
+        {/* La foto (o las iniciales) se amplía; el nombre lleva al perfil */}
+        <span className="post-avatar">
+          <Avatar usuario={autor} tamano={40} ampliable />
+        </span>
         <div className="post-meta">
           <Link to={`/u/${autor.nombreUsuario}`} className="post-autor">
             {autor.nombreUsuario}

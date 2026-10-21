@@ -155,7 +155,7 @@ export function BotonReaccionar({ publicacion, alCambiar }) {
         aria-pressed={Boolean(mia)}
         aria-haspopup="true"
         aria-expanded={abierto}
-        title="Mantén pulsado o pulsa ↑ para elegir otra reacción"
+        title="Mantén pulsado o pulsa la flecha arriba para elegir otra reacción"
         onPointerDown={(e) => {
           fuePulsacionLarga.current = false;
           if (e.pointerType !== 'mouse') {

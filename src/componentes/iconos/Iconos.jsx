@@ -156,6 +156,66 @@ export const IconoCheck = (p) => (
   </Icono>
 );
 
+export const IconoAgregarAmigo = (p) => (
+  <Icono {...p}>
+    <circle cx="9.5" cy="8" r="3.8" />
+    <path d="M2.5 20c0-3.8 3.1-6.5 7-6.5 1.4 0 2.7.3 3.8.9M18.5 13.5v6M15.5 16.5h6" />
+  </Icono>
+);
+
+export const IconoFlechaArriba = (p) => (
+  <Icono {...p}>
+    <path d="M12 19.5v-15M5.5 11 12 4.5l6.5 6.5" />
+  </Icono>
+);
+
+export const IconoFlechaIzquierda = (p) => (
+  <Icono {...p}>
+    <path d="M19.5 12h-15M11 5.5 4.5 12l6.5 6.5" />
+  </Icono>
+);
+
+export const IconoFlechaDerecha = (p) => (
+  <Icono {...p}>
+    <path d="M4.5 12h15M13 5.5l6.5 6.5-6.5 6.5" />
+  </Icono>
+);
+
+/** Flecha en ángulo hacia abajo y a la derecha: "ver respuestas". */
+export const IconoRespuesta = (p) => (
+  <Icono {...p}>
+    <path d="M5 4.5v6.5a3.5 3.5 0 0 0 3.5 3.5h11M15 10l4.5 4.5L15 19" />
+  </Icono>
+);
+
+export const IconoCorreo = (p) => (
+  <Icono {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3.5 7 8.5 6 8.5-6" />
+  </Icono>
+);
+
+export const IconoAlerta = (p) => (
+  <Icono {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7.5v5.5M12 16.5v.01" />
+  </Icono>
+);
+
+export const IconoOjo = (p) => (
+  <Icono {...p}>
+    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+    <circle cx="12" cy="12" r="3" />
+  </Icono>
+);
+
+export const IconoOjoTachado = (p) => (
+  <Icono {...p}>
+    <path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.4 3.3M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" />
+  </Icono>
+);
+
 /** Icono de cada visibilidad de publicación (mismos valores que VISIBILIDADES). */
 export const ICONOS_VISIBILIDAD = {
   publico: IconoMundo,

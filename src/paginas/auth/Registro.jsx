@@ -10,6 +10,7 @@ import {
 import { ICONOS } from '../../componentes/auth/iconos.jsx';
 import { MensajeError } from '../../componentes/MensajeError.jsx';
 import { PAISES } from '../../config.js';
+import { IconoCorreo } from '../../componentes/iconos/Iconos.jsx';
 
 const VACIO = {
   nombreUsuario: '',
@@ -60,7 +61,7 @@ export function Registro() {
         </h1>
         <p className="auth-texto">
           Te enviamos un enlace a <strong>{datos.correo}</strong> para verificar tu cuenta. Si no lo
-          ves, revisa la carpeta de spam. 📬
+          ves, revisa la carpeta de spam. <IconoCorreo tamano={18} className="icono-en-linea" />
         </p>
         <nav className="auth-enlaces auth-enlaces-centro">
           <EnlaceGrafiti to="/login">Ir a ingresar</EnlaceGrafiti>

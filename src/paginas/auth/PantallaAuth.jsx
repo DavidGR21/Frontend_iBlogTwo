@@ -8,6 +8,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { Logo } from '../../componentes/Logo.jsx';
 import { Salpicaduras } from '../../componentes/auth/Salpicaduras.jsx';
 import { TransicionGrafiti } from '../../componentes/auth/TransicionGrafiti.jsx';
+import { IconoOjo, IconoOjoTachado } from '../../componentes/iconos/Iconos.jsx';
 import '../../estilos/auth.css';
 
 // Three.js solo se descarga para esta pantalla
@@ -27,8 +28,8 @@ const MODOS = [
   ['/restablecer-clave', 'restablecer'],
 ];
 const REACCIONES = {
-  clave: '¡No miro, lo prometo! 🙈',
-  espiando: 'Bueno… solo un poquito 👀',
+  clave: { texto: '¡No miro, lo prometo!', Icono: IconoOjoTachado },
+  espiando: { texto: 'Bueno… solo un poquito', Icono: IconoOjo },
 };
 
 export function PantallaAuth() {
@@ -80,7 +81,8 @@ export function PantallaAuth() {
     });
   }, []);
 
-  const mensaje = REACCIONES[foco] ?? SALUDOS[modo];
+  const reaccion = REACCIONES[foco];
+  const mensaje = reaccion?.texto ?? SALUDOS[modo];
 
   return (
     <div className="auth">
@@ -108,6 +110,12 @@ export function PantallaAuth() {
         {mascotaLista && (
           <p key={mensaje} className="auth-burbuja" aria-hidden="true">
             {mensaje}
+            {reaccion && (
+              <>
+                {' '}
+                <reaccion.Icono tamano={18} className="icono-en-linea" />
+              </>
+            )}
           </p>
         )}
       </section>
