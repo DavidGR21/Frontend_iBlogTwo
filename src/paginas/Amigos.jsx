@@ -22,6 +22,7 @@ import { useAvisos } from '../hooks/useAvisos.js';
 import { useConfirmar } from '../hooks/useConfirmar.js';
 import { useDatos } from '../hooks/useDatos.js';
 import { useEventoSocket } from '../hooks/useEventoSocket.js';
+import { useNotificaciones } from '../hooks/useNotificaciones.js';
 import { EVENTOS } from '../sockets/eventos.js';
 import { haceCuanto, nombreCompleto } from '../utils/formato.js';
 
@@ -35,6 +36,7 @@ export function Amigos() {
   const { avisar } = useAvisos();
   const confirmar = useConfirmar();
   const navegar = useNavigate();
+  const { recargar: recargarContadores } = useNotificaciones();
   const [pestana, setPestana] = useState('amigos');
 
   const { datos, cargando, error, recargar, setDatos } = useDatos(
@@ -66,6 +68,7 @@ export function Amigos() {
       async () => {
         await aceptarSolicitud(item.id);
         quitarDeLista(item.id);
+        recargarContadores();
       },
       `Ahora eres amigo de ${nombreCompleto(item.usuario)}`,
     );
@@ -76,6 +79,7 @@ export function Amigos() {
     ejecutar(async () => {
       await eliminarAmistad(item.id);
       quitarDeLista(item.id);
+      if (pestana === 'recibidas') recargarContadores();
     }, mensaje);
   };
 

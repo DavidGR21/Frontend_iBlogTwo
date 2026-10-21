@@ -1,7 +1,8 @@
 /**
  * Estructura común: fondo de calle animado, barra superior + página actual.
  * También escucha los eventos globales (solicitudes de amistad, mensajes)
- * para avisar al usuario esté donde esté.
+ * para avisar al usuario esté donde esté, y muestra cuántos hay pendientes
+ * junto a "Amigos" y "Mensajes".
  *
  * En el celular la navegación va en un menú desplegable (☰) y la barra lleva un botón "+"
  * que abre "Crear un nuevo post" en una ventana modal. Lo publicado ahí llega al inicio por
@@ -11,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useAvisos } from '../hooks/useAvisos.js';
 import { useEventoSocket } from '../hooks/useEventoSocket.js';
+import { useNotificaciones } from '../hooks/useNotificaciones.js';
 import { useSesion } from '../hooks/useSesion.js';
 import { EVENTOS } from '../sockets/eventos.js';
 import { nombreCompleto } from '../utils/formato.js';
@@ -40,8 +42,19 @@ function PuntoConexion({ conectado }) {
   );
 }
 
+/** Número de pendientes junto a un enlace; no se muestra si es 0. */
+function Contador({ cantidad, que }) {
+  if (!cantidad) return null;
+  return (
+    <span className="contador" aria-label={`${cantidad} ${que}`}>
+      {cantidad > 99 ? '99+' : cantidad}
+    </span>
+  );
+}
+
 export function Layout() {
   const { usuario, conectado, cerrarSesion } = useSesion();
+  const { solicitudes, mensajes } = useNotificaciones();
   const { avisar } = useAvisos();
   const navegar = useNavigate();
   const { pathname } = useLocation();
@@ -113,8 +126,14 @@ export function Layout() {
                 <NavLink to="/" end>
                   Inicio
                 </NavLink>
-                <NavLink to="/amigos">Amigos</NavLink>
-                <NavLink to="/mensajes">Mensajes</NavLink>
+                <NavLink to="/amigos">
+                  Amigos
+                  <Contador cantidad={solicitudes} que="solicitudes de amistad" />
+                </NavLink>
+                <NavLink to="/mensajes">
+                  Mensajes
+                  <Contador cantidad={mensajes} que="mensajes sin leer" />
+                </NavLink>
               </nav>
               <nav className="navegacion navegacion-cuenta">
                 <NavLink to={`/u/${usuario.nombreUsuario}`} className="nav-perfil">
@@ -152,6 +171,9 @@ export function Layout() {
                   aria-controls="menu-movil"
                 >
                   {menuAbierto ? <IconoCerrar tamano={22} /> : <IconoMenu tamano={22} />}
+                  {!menuAbierto && solicitudes + mensajes > 0 && (
+                    <span className="contador-punto" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </>
@@ -187,9 +209,11 @@ export function Layout() {
             </NavLink>
             <NavLink to="/amigos">
               <IconoAmigos /> Amigos
+              <Contador cantidad={solicitudes} que="solicitudes de amistad" />
             </NavLink>
             <NavLink to="/mensajes">
               <IconoComentario /> Mensajes
+              <Contador cantidad={mensajes} que="mensajes sin leer" />
             </NavLink>
             <NavLink to="/ajustes">
               <IconoAjustes /> Ajustes

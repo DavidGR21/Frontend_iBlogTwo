@@ -4,11 +4,17 @@
  *  - la conexión de Socket.io (solo existe mientras hay sesión)
  *  - acciones iniciarSesion / cerrarSesion / actualizarUsuario
  *
- * Al abrir la app intenta recuperar la sesión con la cookie del refresh token.
+ * Al abrir la app intenta recuperar la sesión con la cookie del refresh token y,
+ * si no está, con el estado de sesión de 1 día guardado en el navegador.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as authApi from '../api/auth.js';
-import { alCambiarSesion, establecerToken, renovarSesion } from '../api/cliente.js';
+import {
+  alCambiarSesion,
+  establecerToken,
+  guardarEstadoSesion,
+  renovarSesion,
+} from '../api/cliente.js';
 import { crearSocket } from '../sockets/socket.js';
 import { SesionContexto } from './contextos.js';
 
@@ -52,6 +58,7 @@ export function ProveedorSesion({ children }) {
   const iniciarSesion = useCallback(async (identificador, clave) => {
     const datos = await authApi.iniciarSesion(identificador, clave);
     establecerToken(datos.tokenAcceso);
+    guardarEstadoSesion(datos.tokenSesion);
     setUsuario(datos.usuario);
     return datos.usuario;
   }, []);
@@ -63,6 +70,7 @@ export function ProveedorSesion({ children }) {
       // Aunque falle el servidor, la sesión local se cierra igual.
     } finally {
       establecerToken(null);
+      guardarEstadoSesion(null);
       setUsuario(null);
     }
   }, []);

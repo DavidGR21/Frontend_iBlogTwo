@@ -70,16 +70,17 @@ Tipos de reacción (igual que el enum de la BD):
 
 ## Auth — `/auth`
 
-| Método | Ruta                     | Cuerpo                                                               | Respuesta                                            |
-| ------ | ------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------- |
-| POST   | `/registro`              | `{ nombreUsuario, correo, clave, nombres, apellidos?, paisCodigo? }` | `201 { mensaje }`                                    |
-| POST   | `/verificar-correo`      | `{ token }`                                                          | `{ mensaje }`                                        |
-| POST   | `/reenviar-verificacion` | `{ correo }`                                                         | `{ mensaje }` (igual exista o no)                    |
-| POST   | `/login`                 | `{ correo, clave }`                                                  | `{ tokenAcceso, usuario: UsuarioYo }` + cookie       |
-| POST   | `/refrescar`             | — (usa la cookie)                                                    | `{ tokenAcceso, usuario: UsuarioYo }` + cookie nueva |
-| POST   | `/logout`                | —                                                                    | `204`, borra la cookie                               |
-| POST   | `/olvide-clave`          | `{ correo }`                                                         | `{ mensaje }` (igual exista o no)                    |
-| POST   | `/restablecer-clave`     | `{ token, clave }`                                                   | `{ mensaje }`                                        |
+| Método | Ruta                     | Cuerpo                                                               | Respuesta                                                         |
+| ------ | ------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| POST   | `/registro`              | `{ nombreUsuario, correo, clave, nombres, apellidos?, paisCodigo? }` | `201 { mensaje }`                                                 |
+| POST   | `/verificar-correo`      | `{ token }`                                                          | `{ mensaje }`                                                     |
+| POST   | `/reenviar-verificacion` | `{ correo }`                                                         | `{ mensaje }` (igual exista o no)                                 |
+| POST   | `/login`                 | `{ correo, clave }`                                                  | `{ tokenAcceso, tokenSesion, usuario: UsuarioYo }` + cookie       |
+| POST   | `/refrescar`             | — (usa la cookie)                                                    | `{ tokenAcceso, tokenSesion, usuario: UsuarioYo }` + cookie nueva |
+| POST   | `/restaurar`             | `{ tokenSesion }` (sin cookie)                                       | `{ tokenAcceso, usuario: UsuarioYo }`                             |
+| POST   | `/logout`                | —                                                                    | `204`, borra la cookie                                            |
+| POST   | `/olvide-clave`          | `{ correo }`                                                         | `{ mensaje }` (igual exista o no)                                 |
+| POST   | `/restablecer-clave`     | `{ token, clave }`                                                   | `{ mensaje }`                                                     |
 
 Enlaces que el backend pone en los correos:
 
@@ -88,6 +89,11 @@ Enlaces que el backend pone en los correos:
 
 Cookie del refresh token: `httpOnly`, `path=/api/v1/auth`, y en producción
 `secure: true, sameSite: 'none'` (Vercel y Render son dominios distintos).
+
+Token de sesión (`tokenSesion: { token, expiraEn }`): JWT de 24 h que no se guarda en
+la BD. El frontend lo deja en `localStorage` (`iblog_sesion`) y, si `/refrescar` falla
+porque la cookie no llegó, lo canjea en `/restaurar`. `/restaurar` no lo renueva, así
+que sin cookie la sesión dura como máximo un día; deja de valer si cambia la clave.
 En desarrollo (`localhost`), `sameSite: 'lax'` y `secure: false`.
 
 ## Usuarios — `/usuarios`

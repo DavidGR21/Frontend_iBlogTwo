@@ -9,11 +9,13 @@ import { aceptarSolicitud, eliminarAmistad, enviarSolicitud } from '../api/amist
 import { abrirConversacion } from '../api/conversaciones.js';
 import { useAvisos } from '../hooks/useAvisos.js';
 import { useConfirmar } from '../hooks/useConfirmar.js';
+import { useNotificaciones } from '../hooks/useNotificaciones.js';
 
 export function AccionesAmistad({ perfil, alCambiar }) {
   const { avisar } = useAvisos();
   const confirmar = useConfirmar();
   const navegar = useNavigate();
+  const { recargar: recargarContadores } = useNotificaciones();
   const [ocupado, setOcupado] = useState(false);
   const amistad = perfil.amistad ?? null;
 
@@ -39,6 +41,7 @@ export function AccionesAmistad({ perfil, alCambiar }) {
     ejecutar(async () => {
       await aceptarSolicitud(amistad.id);
       alCambiar({ ...amistad, estado: 'aceptada' });
+      recargarContadores();
     }, `Ahora eres amigo de ${perfil.nombres}`);
 
   // `pregunta`: opciones de la ventana de confirmación (null = sin preguntar)
@@ -47,6 +50,7 @@ export function AccionesAmistad({ perfil, alCambiar }) {
     ejecutar(async () => {
       await eliminarAmistad(amistad.id);
       alCambiar(null);
+      recargarContadores(); // pudo ser el rechazo de una solicitud recibida
     }, mensaje);
   };
 

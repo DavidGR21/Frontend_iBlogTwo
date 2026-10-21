@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import { App } from './App.jsx';
 import { ProveedorAvisos } from './contexto/ProveedorAvisos.jsx';
 import { ProveedorConfirmacion } from './contexto/ProveedorConfirmacion.jsx';
+import { ProveedorNotificaciones } from './contexto/ProveedorNotificaciones.jsx';
 import { ProveedorSesion } from './contexto/ProveedorSesion.jsx';
 import './estilos/global.css';
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
       <ProveedorAvisos>
         <ProveedorConfirmacion>
           <ProveedorSesion>
-            <App />
+            <ProveedorNotificaciones>
+              <App />
+            </ProveedorNotificaciones>
           </ProveedorSesion>
         </ProveedorConfirmacion>
       </ProveedorAvisos>

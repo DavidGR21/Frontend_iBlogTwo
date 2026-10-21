@@ -4,7 +4,7 @@
  * En el celular la lista es un panel desplegable que se abre con el icono de conversaciones
  * y se oculta al elegir una.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, useParams } from 'react-router';
 import { listarConversaciones } from '../api/conversaciones.js';
 import { Avatar } from '../componentes/Avatar.jsx';
@@ -14,6 +14,7 @@ import { PanelChat } from '../componentes/mensajes/PanelChat.jsx';
 import { MensajeError } from '../componentes/MensajeError.jsx';
 import { useDatos } from '../hooks/useDatos.js';
 import { useEventoSocket } from '../hooks/useEventoSocket.js';
+import { useNotificaciones } from '../hooks/useNotificaciones.js';
 import { useSesion } from '../hooks/useSesion.js';
 import { EVENTOS } from '../sockets/eventos.js';
 import { nombreCompleto } from '../utils/formato.js';
@@ -21,6 +22,7 @@ import { nombreCompleto } from '../utils/formato.js';
 export function Mensajes() {
   const { conversacionId } = useParams();
   const { usuario } = useSesion();
+  const { fijarMensajesSinLeer } = useNotificaciones();
   const { datos, cargando, error, recargar, setDatos } = useDatos(
     listarConversaciones,
     'conversaciones',
@@ -75,6 +77,11 @@ export function Mensajes() {
       )
     : conversaciones;
   const totalSinLeer = conversaciones.reduce((suma, c) => suma + (c.noLeidos ?? 0), 0);
+
+  // Esta página lleva la cuenta exacta: el contador de la barra la sigue.
+  useEffect(() => {
+    if (datos) fijarMensajesSinLeer(totalSinLeer);
+  }, [datos, totalSinLeer, fijarMensajesSinLeer]);
 
   return (
     <div className={`chat ${listaAbierta ? 'chat-lista-abierta' : ''}`}>
