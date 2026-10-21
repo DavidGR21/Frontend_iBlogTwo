@@ -10,7 +10,8 @@ function aleatorio(semilla) {
   };
 }
 
-function mancha({ x: cx, y: cy, radio, color, semilla }) {
+/** Mancha de pintura con gotas y chorreos (también la usa el fondo de la app). */
+export function mancha({ x: cx, y: cy, radio, color, semilla }) {
   const azar = aleatorio(semilla);
   const n = 26;
   const puntos = Array.from({ length: n }, (_, i) => {
