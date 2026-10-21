@@ -1,12 +1,14 @@
 /**
  * Ventana modal sobre la página (en el móvil sube desde abajo como una hoja).
  * Esc o clic en el fondo la cierran; bloquea el scroll y devuelve el foco al cerrar.
+ * Al abrirse enfoca el elemento con `data-enfocar` (si lo hay) o la propia ventana.
+ * `className` se añade a la ventana (p. ej. "modal-confirmar" para una más estrecha).
  */
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { IconoCerrar } from './iconos/Iconos.jsx';
 
-export function Modal({ titulo, alCerrar, children }) {
+export function Modal({ titulo, alCerrar, children, className = '' }) {
   const idTitulo = useId();
   const caja = useRef(null);
   const alCerrarRef = useRef(alCerrar);
@@ -19,7 +21,7 @@ export function Modal({ titulo, alCerrar, children }) {
     const anterior = document.activeElement;
     const desbordamiento = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    caja.current?.focus();
+    (caja.current?.querySelector('[data-enfocar]') ?? caja.current)?.focus();
     const alTeclear = (e) => e.key === 'Escape' && alCerrarRef.current();
     window.addEventListener('keydown', alTeclear);
     return () => {
@@ -33,7 +35,7 @@ export function Modal({ titulo, alCerrar, children }) {
     <div className="modal-fondo" onClick={(e) => e.target === e.currentTarget && alCerrar()}>
       <div
         ref={caja}
-        className="modal"
+        className={`modal ${className}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
