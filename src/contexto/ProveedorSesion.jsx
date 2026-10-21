@@ -49,8 +49,8 @@ export function ProveedorSesion({ children }) {
     };
   }, [usuarioId]);
 
-  const iniciarSesion = useCallback(async (correo, clave) => {
-    const datos = await authApi.iniciarSesion(correo, clave);
+  const iniciarSesion = useCallback(async (identificador, clave) => {
+    const datos = await authApi.iniciarSesion(identificador, clave);
     establecerToken(datos.tokenAcceso);
     setUsuario(datos.usuario);
     return datos.usuario;
