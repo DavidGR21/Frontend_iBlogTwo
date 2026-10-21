@@ -1,0 +1,65 @@
+/* Logo de iBlogTwo (se usa dentro y fuera de la app, por eso lleva sus colores). */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1;
+}
+.logo-lata {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.logo-niebla {
+  transform-box: fill-box;
+  transform-origin: 0 100%;
+  animation: logo-niebla 2.8s ease-in-out infinite;
+}
+.logo-texto {
+  font-family: 'Rubik Wet Paint', 'Permanent Marker', cursive;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+  color: #b14bff;
+  text-shadow:
+    -1.5px -1.5px 0 #120c1f,
+    1.5px -1.5px 0 #120c1f,
+    -1.5px 1.5px 0 #120c1f,
+    1.5px 1.5px 0 #120c1f,
+    3px 4px 0 #3de0ff,
+    0 0 18px rgb(177 75 255 / 0.45);
+  transform: rotate(-3deg);
+}
+.logo-two {
+  color: #ffe03d;
+  text-shadow:
+    -1.5px -1.5px 0 #120c1f,
+    1.5px -1.5px 0 #120c1f,
+    -1.5px 1.5px 0 #120c1f,
+    1.5px 1.5px 0 #120c1f,
+    3px 4px 0 #ff3dd8,
+    0 0 18px rgb(255 224 61 / 0.35);
+}
+@keyframes logo-niebla {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@media (max-width: 560px) {
+  .logo-texto {
+    font-size: 1.6rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-niebla {
+    animation: none;
+  }
+}

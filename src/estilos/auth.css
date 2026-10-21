@@ -102,13 +102,7 @@
   top: 1.1rem;
   left: 1.5rem;
   z-index: 3;
-  font-family: var(--fuente-marcador);
-  font-size: 2.1rem;
-  color: var(--neon-rosa);
-  text-shadow:
-    2px 3px 0 var(--tinta),
-    4px 5px 0 var(--neon-cian);
-  transform: rotate(-6deg);
+  transform: rotate(-4deg);
 }
 .auth-marca:hover {
   text-decoration: none;
