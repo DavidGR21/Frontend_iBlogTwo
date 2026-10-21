@@ -12,8 +12,12 @@ import { TarjetaPublicacion } from './TarjetaPublicacion.jsx';
 export function ListaPublicaciones({ lista, textoVacio = 'Todavía no hay publicaciones.' }) {
   const { items, setItems } = lista;
 
-  const reemplazar = (publicacion) =>
-    setItems((actuales) => actuales.map((p) => (p.id === publicacion.id ? publicacion : p)));
+  // `cambio` puede ser la publicación nueva o una función (anterior) => nueva: con la función
+  // dos eventos seguidos (p. ej. reacción y comentario) no se pisan entre sí.
+  const actualizar = (id, cambio) =>
+    setItems((actuales) =>
+      actuales.map((p) => (p.id === id ? (typeof cambio === 'function' ? cambio(p) : cambio) : p)),
+    );
   const quitar = (id) => setItems((actuales) => actuales.filter((p) => p.id !== id));
 
   useEventoSocket(EVENTOS.REACCION_ACTUALIZADA, ({ publicacionId, reacciones }) => {
@@ -28,7 +32,7 @@ export function ListaPublicaciones({ lista, textoVacio = 'Todavía no hay public
         <TarjetaPublicacion
           key={publicacion.id}
           publicacion={publicacion}
-          alCambiar={reemplazar}
+          alCambiar={(cambio) => actualizar(publicacion.id, cambio)}
           alEliminar={quitar}
         />
       ))}

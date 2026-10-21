@@ -1,39 +1,130 @@
 /**
- * Una publicación: autor, texto, imágenes, reacciones y enlace a comentarios.
- * El autor puede editarla o eliminarla.
+ * Una publicación: autor, texto, imágenes, resumen de reacciones, botones de reaccionar y
+ * comentar, y los comentarios desplegados dentro de la tarjeta.
+ * El autor puede editarla o eliminarla desde el menú "⋯".
  */
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { editarPublicacion, eliminarPublicacion } from '../../api/publicaciones.js';
+import { eliminarPublicacion } from '../../api/publicaciones.js';
 import { VISIBILIDADES } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
+import { useEventoSocket } from '../../hooks/useEventoSocket.js';
+import { useEnPantalla, useSalaPublicacion } from '../../hooks/useSalaPublicacion.js';
 import { useSesion } from '../../hooks/useSesion.js';
-import { fechaCompleta, haceCuanto, nombreCompleto } from '../../utils/formato.js';
+import { EVENTOS } from '../../sockets/eventos.js';
+import { fechaCompleta, haceCuanto } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
-import { BarraReacciones } from './BarraReacciones.jsx';
+import { SeccionComentarios } from '../comentarios/SeccionComentarios.jsx';
+import {
+  ICONOS_VISIBILIDAD,
+  IconoBorrar,
+  IconoComentario,
+  IconoEditar,
+  IconoMas,
+} from '../iconos/Iconos.jsx';
+import { BotonReaccionar, ResumenReacciones } from './BarraReacciones.jsx';
+import { EditorPublicacion } from './EditorPublicacion.jsx';
+import { GaleriaImagenes } from './GaleriaImagenes.jsx';
 
-export function TarjetaPublicacion({ publicacion, alCambiar, alEliminar, mostrarEnlace = true }) {
+function MenuPublicacion({ alEditar, alEliminar }) {
+  const [abierto, setAbierto] = useState(false);
+  const raiz = useRef(null);
+
+  useEffect(() => {
+    if (!abierto) return undefined;
+    const fuera = (e) => !raiz.current?.contains(e.target) && setAbierto(false);
+    const tecla = (e) => e.key === 'Escape' && setAbierto(false);
+    document.addEventListener('pointerdown', fuera);
+    document.addEventListener('keydown', tecla);
+    return () => {
+      document.removeEventListener('pointerdown', fuera);
+      document.removeEventListener('keydown', tecla);
+    };
+  }, [abierto]);
+
+  const elegir = (accion) => () => {
+    setAbierto(false);
+    accion();
+  };
+
+  return (
+    <div className="post-menu" ref={raiz}>
+      <button
+        type="button"
+        className="post-menu-boton"
+        onClick={() => setAbierto(!abierto)}
+        aria-label="Opciones de la publicación"
+        aria-haspopup="menu"
+        aria-expanded={abierto}
+      >
+        <IconoMas />
+      </button>
+      {abierto && (
+        <div className="post-menu-lista" role="menu">
+          <button type="button" role="menuitem" onClick={elegir(alEditar)}>
+            <IconoEditar tamano={18} />
+            Editar publicación
+          </button>
+          <button type="button" role="menuitem" className="peligro" onClick={elegir(alEliminar)}>
+            <IconoBorrar tamano={18} />
+            Eliminar publicación
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Publicaciones solo de texto y cortas: en grande, centradas y sobre un fondo de color
+const LIENZO_MAX_CARACTERES = 220;
+const LIENZO_MAX_LINEAS = 6;
+const FONDOS_LIENZO = 6; // .post-lienzo-0 … -5 en app.css
+
+function estiloLienzo(publicacion) {
+  const texto = publicacion.contenido ?? '';
+  if (publicacion.imagenes?.length || texto.length > LIENZO_MAX_CARACTERES) return null;
+  if (texto.split('\n').length > LIENZO_MAX_LINEAS) return null;
+  // Siempre el mismo fondo para la misma publicación
+  const fondo = [...publicacion.id].reduce((suma, c) => suma + c.charCodeAt(0), 0) % FONDOS_LIENZO;
+  const tamano = texto.length <= 60 ? 'grande' : texto.length <= 130 ? 'mediano' : 'pequeno';
+  return `post-lienzo post-lienzo-${fondo} post-lienzo-${tamano}`;
+}
+
+export function TarjetaPublicacion({
+  publicacion,
+  alCambiar,
+  alEliminar,
+  comentariosAbiertos = false,
+}) {
   const { usuario } = useSesion();
   const { avisar } = useAvisos();
   const [editando, setEditando] = useState(false);
-  const [texto, setTexto] = useState(publicacion.contenido);
-  const [guardando, setGuardando] = useState(false);
+  const [verComentarios, setVerComentarios] = useState(comentariosAbiertos);
+  const tarjeta = useRef(null);
 
-  const esMia = publicacion.autor.id === usuario?.id;
+  // En la sala de la publicación (reacciones y comentarios en vivo) mientras se ve en pantalla
+  const enPantalla = useEnPantalla(tarjeta);
+  useSalaPublicacion(publicacion.id, enPantalla || verComentarios);
+
+  const { autor } = publicacion;
+  const esMia = autor.id === usuario?.id;
   const visibilidad = VISIBILIDADES.find((v) => v.valor === publicacion.visibilidad);
+  const IconoVisibilidad = ICONOS_VISIBILIDAD[publicacion.visibilidad];
+  const totalComentarios = publicacion.totalComentarios ?? 0;
 
-  async function guardar() {
-    if (!texto.trim()) return;
-    setGuardando(true);
-    try {
-      alCambiar(await editarPublicacion(publicacion.id, { contenido: texto.trim() }));
-      setEditando(false);
-    } catch (e) {
-      avisar(e.message, 'error');
-    } finally {
-      setGuardando(false);
-    }
-  }
+  // `alCambiar` acepta una función (anterior) => nueva: así se suma sobre la versión más
+  // reciente aunque justo antes haya llegado otro evento (p. ej. una reacción)
+  const sumarComentario = useCallback(() => {
+    alCambiar((p) => ({ ...p, totalComentarios: (p.totalComentarios ?? 0) + 1 }));
+  }, [alCambiar]);
+
+  // Con los comentarios cerrados, la tarjeta cuenta los nuevos. Abiertos, los cuenta
+  // SeccionComentarios (que además evita contar dos veces el propio).
+  useEventoSocket(EVENTOS.COMENTARIO_NUEVO, (comentario) => {
+    if (!verComentarios && comentario.publicacionId === publicacion.id) sumarComentario();
+  });
+
+  const lienzo = !editando && estiloLienzo(publicacion);
 
   async function eliminar() {
     if (!window.confirm('¿Eliminar esta publicación?')) return;
@@ -47,71 +138,84 @@ export function TarjetaPublicacion({ publicacion, alCambiar, alEliminar, mostrar
   }
 
   return (
-    <article className="tarjeta">
-      <div className="fila-espaciada">
-        <Link to={`/u/${publicacion.autor.nombreUsuario}`} className="autor">
-          <Avatar usuario={publicacion.autor} />
-          <span>
-            <strong>{nombreCompleto(publicacion.autor)}</strong>
-            <span className="suave" title={fechaCompleta(publicacion.creadaEn)}>
-              {haceCuanto(publicacion.creadaEn)}
-              {publicacion.editada && ' · editada'} · {visibilidad?.nombre}
-            </span>
-          </span>
+    <article className="tarjeta post" ref={tarjeta}>
+      <header className="post-cabecera">
+        <Link to={`/u/${autor.nombreUsuario}`} className="post-avatar">
+          <Avatar usuario={autor} tamano={40} />
         </Link>
+        <div className="post-meta">
+          <Link to={`/u/${autor.nombreUsuario}`} className="post-autor">
+            {autor.nombreUsuario}
+          </Link>
+          <span className="post-detalle">
+            <Link
+              to={`/publicaciones/${publicacion.id}`}
+              title={fechaCompleta(publicacion.creadaEn)}
+            >
+              {haceCuanto(publicacion.creadaEn)}
+            </Link>
+            {publicacion.editada && <span>· editada</span>}
+            {IconoVisibilidad && (
+              <span title={visibilidad?.nombre} aria-label={visibilidad?.nombre}>
+                · <IconoVisibilidad tamano={14} />
+              </span>
+            )}
+          </span>
+        </div>
         {esMia && !editando && (
-          <div className="fila">
-            <button className="boton-enlace" onClick={() => setEditando(true)}>
-              Editar
-            </button>
-            <button className="boton-enlace" onClick={eliminar}>
-              Eliminar
-            </button>
-          </div>
+          <MenuPublicacion alEditar={() => setEditando(true)} alEliminar={eliminar} />
+        )}
+      </header>
+
+      {editando ? (
+        <EditorPublicacion
+          publicacion={publicacion}
+          alGuardar={(editada) => {
+            alCambiar((p) => ({ ...p, ...editada }));
+            setEditando(false);
+          }}
+          alCancelar={() => setEditando(false)}
+        />
+      ) : lienzo ? (
+        <div className={lienzo}>
+          <p className="texto-libre">{publicacion.contenido}</p>
+        </div>
+      ) : (
+        <p className="texto-libre post-texto">{publicacion.contenido}</p>
+      )}
+
+      {!editando && publicacion.imagenes?.length > 0 && (
+        <GaleriaImagenes imagenes={publicacion.imagenes} />
+      )}
+
+      <div className="post-resumen">
+        <ResumenReacciones reacciones={publicacion.reacciones} />
+        {totalComentarios > 0 && (
+          <button
+            type="button"
+            className="post-resumen-comentarios"
+            onClick={() => setVerComentarios(!verComentarios)}
+          >
+            {totalComentarios} comentario{totalComentarios === 1 ? '' : 's'}
+          </button>
         )}
       </div>
 
-      {editando ? (
-        <div className="formulario" style={{ marginTop: '0.75rem' }}>
-          <textarea value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={5000} />
-          <div className="fila">
-            <button className="boton" onClick={guardar} disabled={guardando || !texto.trim()}>
-              Guardar
-            </button>
-            <button
-              className="boton-secundario"
-              onClick={() => {
-                setTexto(publicacion.contenido);
-                setEditando(false);
-              }}
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <p className="texto-libre">{publicacion.contenido}</p>
-      )}
+      <div className="post-acciones">
+        <BotonReaccionar publicacion={publicacion} alCambiar={alCambiar} />
+        <button
+          type="button"
+          className={`accion-post ${verComentarios ? 'activa' : ''}`}
+          onClick={() => setVerComentarios(!verComentarios)}
+          aria-expanded={verComentarios}
+        >
+          <IconoComentario />
+          Comentar
+        </button>
+      </div>
 
-      {publicacion.imagenes?.length > 0 && (
-        <div className={`imagenes ${publicacion.imagenes.length === 1 ? 'imagenes-una' : ''}`}>
-          {publicacion.imagenes.map((imagen) => (
-            <a key={imagen.id} href={imagen.url} target="_blank" rel="noreferrer">
-              <img src={imagen.url} alt="" loading="lazy" />
-            </a>
-          ))}
-        </div>
-      )}
-
-      <BarraReacciones publicacion={publicacion} alCambiar={alCambiar} />
-
-      {mostrarEnlace && (
-        <p className="suave" style={{ margin: '0.5rem 0 0' }}>
-          <Link to={`/publicaciones/${publicacion.id}`}>
-            💬 {publicacion.totalComentarios ?? 0} comentario
-            {publicacion.totalComentarios === 1 ? '' : 's'}
-          </Link>
-        </p>
+      {verComentarios && (
+        <SeccionComentarios publicacionId={publicacion.id} alAgregarComentario={sumarComentario} />
       )}
     </article>
   );
