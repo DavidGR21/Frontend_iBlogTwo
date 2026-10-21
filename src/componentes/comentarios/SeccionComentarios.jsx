@@ -1,10 +1,12 @@
 /**
- * Comentarios de una publicación, con respuestas y actualización en tiempo real.
+ * Comentarios de una publicación, desplegados dentro de la propia tarjeta: primero unos
+ * pocos y "Ver más comentarios" para cargar otro grupo. Con respuestas y en tiempo real
+ * (la tarjeta es la que se une a la sala de la publicación).
  *
  * Un mismo comentario puede llegar dos veces (respuesta del POST y evento del socket),
  * por eso se lleva un registro de ids ya vistos.
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   crearComentario,
   editarComentario,
@@ -12,6 +14,7 @@ import {
   listarComentarios,
   listarRespuestas,
 } from '../../api/comentarios.js';
+import { COMENTARIOS_INICIALES, COMENTARIOS_POR_CLIC } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
 import { useEventoSocket } from '../../hooks/useEventoSocket.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
@@ -23,7 +26,15 @@ import { ItemComentario } from './ItemComentario.jsx';
 
 export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
   const { avisar } = useAvisos();
-  const raiz = usePaginado((cursor) => listarComentarios(publicacionId, cursor), publicacionId);
+  const raiz = usePaginado(
+    (cursor) =>
+      listarComentarios(
+        publicacionId,
+        cursor,
+        cursor ? COMENTARIOS_POR_CLIC : COMENTARIOS_INICIALES,
+      ),
+    publicacionId,
+  );
   const setRaiz = raiz.setItems;
   const [respuestas, setRespuestas] = useState({}); // { comentarioPadreId: Comentario[] }
   const vistos = useRef(new Set());
@@ -103,12 +114,16 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
     },
   };
 
-  return (
-    <section className="tarjeta">
-      <h2>Comentarios</h2>
-      <FormComentario alEnviar={(texto) => acciones.crear(texto, undefined)} />
+  // Los que llegan en vivo se agregan al final aunque falten páginas por cargar:
+  // se ordenan por fecha para que todo quede en su sitio.
+  const ordenados = useMemo(
+    () => [...raiz.items].sort((a, b) => new Date(a.creadoEn) - new Date(b.creadoEn)),
+    [raiz.items],
+  );
 
-      {raiz.items.map((comentario) => (
+  return (
+    <section className="comentarios" aria-label="Comentarios">
+      {ordenados.map((comentario) => (
         <ItemComentario
           key={comentario.id}
           comentario={comentario}
@@ -120,13 +135,15 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
       {raiz.cargando && <Cargando />}
       <MensajeError error={raiz.error} />
       {!raiz.cargando && !raiz.error && raiz.items.length === 0 && (
-        <p className="vacio">Sé el primero en comentar.</p>
+        <p className="comentarios-vacio">Todavía no hay comentarios. ¡Sé el primero!</p>
       )}
       {raiz.hayMas && !raiz.cargando && (
-        <button className="boton-secundario" onClick={raiz.cargarMas}>
+        <button type="button" className="comentarios-mas" onClick={raiz.cargarMas}>
           Ver más comentarios
         </button>
       )}
+
+      <FormComentario alEnviar={(texto) => acciones.crear(texto, undefined)} conAvatar />
     </section>
   );
 }

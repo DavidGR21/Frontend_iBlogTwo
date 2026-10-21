@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useSesion } from '../../hooks/useSesion.js';
-import { fechaCompleta, haceCuanto, nombreCompleto } from '../../utils/formato.js';
+import { fechaCompleta, haceCuanto } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
 import { FormComentario } from './FormComentario.jsx';
 
@@ -35,19 +35,24 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
       <Avatar usuario={comentario.autor} tamano={32} />
       <div className="comentario-cuerpo">
         <div className="comentario-burbuja">
-          <Link to={`/u/${comentario.autor.nombreUsuario}`}>
-            <strong>{nombreCompleto(comentario.autor)}</strong>
+          <Link to={`/u/${comentario.autor.nombreUsuario}`} className="comentario-autor">
+            {comentario.autor.nombreUsuario}
           </Link>
           {comentario.eliminado ? (
             <p className="comentario-eliminado">Comentario eliminado</p>
           ) : editando ? (
-            <FormComentario alEnviar={editar} placeholder="Edita tu comentario" autoFocus />
+            <FormComentario
+              alEnviar={editar}
+              placeholder="Edita tu comentario"
+              valorInicial={comentario.contenido}
+              autoFocus
+            />
           ) : (
             <p className="texto-libre">{comentario.contenido}</p>
           )}
         </div>
 
-        <div className="fila suave">
+        <div className="comentario-acciones">
           <span title={fechaCompleta(comentario.creadoEn)}>{haceCuanto(comentario.creadoEn)}</span>
           {!comentario.eliminado && (
             <button className="boton-enlace" onClick={() => setRespondiendo(!respondiendo)}>
@@ -69,13 +74,16 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
         {respondiendo && (
           <FormComentario
             alEnviar={responder}
-            placeholder={`Responder a ${comentario.autor.nombres}…`}
+            placeholder={`Responder a ${comentario.autor.nombreUsuario}…`}
             autoFocus
           />
         )}
 
         {faltanPorCargar && (
-          <button className="boton-enlace" onClick={() => acciones.cargarRespuestas(comentario.id)}>
+          <button
+            className="comentario-ver-respuestas"
+            onClick={() => acciones.cargarRespuestas(comentario.id)}
+          >
             ↳ Ver {comentario.totalRespuestas} respuesta
             {comentario.totalRespuestas === 1 ? '' : 's'}
           </button>
