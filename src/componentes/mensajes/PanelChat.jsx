@@ -13,7 +13,7 @@ import { useEventoSocket } from '../../hooks/useEventoSocket.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
 import { useSesion } from '../../hooks/useSesion.js';
 import { EVENTOS } from '../../sockets/eventos.js';
-import { hora, nombreCompleto } from '../../utils/formato.js';
+import { hora } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
 import { Cargando } from '../Cargando.jsx';
 import { MensajeError } from '../MensajeError.jsx';
@@ -153,7 +153,7 @@ export function PanelChat({ conversacion, alLeer }) {
       <div className="chat-cabecera">
         <Link to={`/u/${otro.nombreUsuario}`} className="autor">
           <Avatar usuario={otro} tamano={32} />
-          <strong>{nombreCompleto(otro)}</strong>
+          <strong>{otro.nombreUsuario}</strong>
         </Link>
       </div>
 
