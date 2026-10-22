@@ -57,10 +57,16 @@ Para la siguiente página el frontend envía `?antesDe=<siguienteCursor>&limite=
 
 // Comentario
 { "id": "uuid", "publicacionId": "uuid", "comentarioPadreId": "uuid" | null, "autor": UsuarioResumen,
-  "contenido": "texto" | null /* null si eliminado */, "eliminado": false, "totalRespuestas": 2, "creadoEn": "fecha" }
+  "contenido": "texto" | null /* null si eliminado o sticker */, "sticker": Sticker | null,
+  "eliminado": false, "totalRespuestas": 2, "creadoEn": "fecha" }
 
 // Mensaje
-{ "id": 123, "conversacionId": "uuid", "remitenteId": "uuid", "contenido": "texto", "imagenUrl": null, "creadoEn": "fecha" }
+{ "id": 123, "conversacionId": "uuid", "remitenteId": "uuid", "contenido": "texto" | null,
+  "sticker": Sticker | null, "imagenUrl": null, "creadoEn": "fecha" }
+
+// Sticker (KLIPY). En las listas del selector también trae "miniatura" (versión pequeña).
+{ "id": "grrr-rawr-sticker", "titulo": "Grrr Rawr", "url": "https://static.klipy.com/…",
+  "ancho": 200, "alto": 200 }
 ```
 
 Tipos de reacción (igual que el enum de la BD):
@@ -132,16 +138,19 @@ En `PATCH /yo/perfil`, un campo enviado como `null` borra ese dato; un campo aus
 | DELETE | `/:id` 🔒             |                                              | `204`                                       |
 | PUT    | `/:id/reaccion` 🔒    | `{ tipo }`                                   | `{ reacciones, miReaccion }`                |
 | DELETE | `/:id/reaccion` 🔒    |                                              | `{ reacciones, miReaccion: null }`          |
+| GET    | `/:id/reacciones`     | `?tipo&antesDe&limite`                       | `{ items: Reaccion[], siguienteCursor }`    |
+
+`Reaccion` = `{ id, usuario: UsuarioResumen, tipo, creadaEn }` (`id` es el del usuario; más recientes primero, `tipo` filtra por una reacción).
 
 ## Comentarios — `/comentarios`
 
-| Método | Ruta              | Cuerpo / Query                                     | Respuesta                                                               |
-| ------ | ----------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
-| GET    | `/`               | `?publicacionId&antesDe&limite`                    | `{ items: Comentario[], siguienteCursor }` (raíz, más antiguos primero) |
-| GET    | `/:id/respuestas` |                                                    | `{ items: Comentario[] }`                                               |
-| POST   | `/` 🔒            | `{ publicacionId, contenido, comentarioPadreId? }` | `201 Comentario`                                                        |
-| PATCH  | `/:id` 🔒         | `{ contenido }`                                    | `Comentario`                                                            |
-| DELETE | `/:id` 🔒         |                                                    | `204`                                                                   |
+| Método | Ruta              | Cuerpo / Query                                                  | Respuesta                                                               |
+| ------ | ----------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| GET    | `/`               | `?publicacionId&antesDe&limite`                                 | `{ items: Comentario[], siguienteCursor }` (raíz, más antiguos primero) |
+| GET    | `/:id/respuestas` |                                                                 | `{ items: Comentario[] }`                                               |
+| POST   | `/` 🔒            | `{ publicacionId, contenido \| stickerId, comentarioPadreId? }` | `201 Comentario`                                                        |
+| PATCH  | `/:id` 🔒         | `{ contenido }`                                                 | `Comentario`                                                            |
+| DELETE | `/:id` 🔒         |                                                                 | `204`                                                                   |
 
 ## Amistades — `/amistades` 🔒
 
@@ -166,8 +175,23 @@ En `PATCH /yo/perfil`, un campo enviado como `null` borra ese dato; un campo aus
 ```jsonc
 // Conversacion
 { "id": "uuid", "otroUsuario": UsuarioResumen,
-  "ultimoMensaje": { "contenido": "…", "remitenteId": "uuid", "creadoEn": "fecha" } | null, "noLeidos": 0 }
+  "ultimoMensaje": { "contenido": "…" | null, "sticker": Sticker | null, "remitenteId": "uuid",
+                     "creadoEn": "fecha" } | null, "noLeidos": 0 }
 ```
+
+## Stickers — `/stickers`
+
+Los sirve el backend desde KLIPY (la llave `KLIPY_API_KEY` nunca llega al navegador). El cursor
+`antesDe` es el número de la página siguiente. Para enviar uno, los comentarios y los mensajes
+reciben `stickerId` (solo, sin texto ni imagen); los comentarios de sticker no se editan.
+
+| Método | Ruta             | Query        | Respuesta                                           |
+| ------ | ---------------- | ------------ | --------------------------------------------------- |
+| GET    | `/estado`        |              | `{ disponible }` (`false` si no hay llave de KLIPY) |
+| GET    | `/tendencias` 🔒 | `?antesDe`   | `{ items: Sticker[], siguienteCursor }`             |
+| GET    | `/buscar` 🔒     | `?q&antesDe` | `{ items: Sticker[], siguienteCursor }`             |
+
+Sin llave, `/tendencias` y `/buscar` responden `503 NO_DISPONIBLE`.
 
 ---
 
@@ -179,13 +203,13 @@ frontend renueva el token y reconecta.
 
 ### Cliente → servidor
 
-| Evento                     | Datos                           | Respuesta (ack)                                                     |
-| -------------------------- | ------------------------------- | ------------------------------------------------------------------- |
-| `publicacion:unirse`       | `publicacionId`                 | —                                                                   |
-| `publicacion:salir`        | `publicacionId`                 | —                                                                   |
-| `mensaje:enviar`           | `{ conversacionId, contenido }` | `{ ok: true, mensaje: Mensaje }` o `{ ok: false, error: "CODIGO" }` |
-| `mensaje:leido`            | `{ conversacionId, mensajeId }` | —                                                                   |
-| `conversacion:escribiendo` | `{ conversacionId }`            | —                                                                   |
+| Evento                     | Datos                                                             | Respuesta (ack)                                                     |
+| -------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `publicacion:unirse`       | `publicacionId`                                                   | —                                                                   |
+| `publicacion:salir`        | `publicacionId`                                                   | —                                                                   |
+| `mensaje:enviar`           | `{ conversacionId, contenido }` o `{ conversacionId, stickerId }` | `{ ok: true, mensaje: Mensaje }` o `{ ok: false, error: "CODIGO" }` |
+| `mensaje:leido`            | `{ conversacionId, mensajeId }`                                   | —                                                                   |
+| `conversacion:escribiendo` | `{ conversacionId }`                                              | —                                                                   |
 
 ### Servidor → cliente
 
