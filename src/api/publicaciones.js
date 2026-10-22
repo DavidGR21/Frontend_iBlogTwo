@@ -13,3 +13,5 @@ export const editarPublicacion = (id, datos) => api.patch(`/publicaciones/${id}`
 export const eliminarPublicacion = (id) => api.delete(`/publicaciones/${id}`);
 export const reaccionar = (id, tipo) => api.put(`/publicaciones/${id}/reaccion`, { tipo });
 export const quitarReaccion = (id) => api.delete(`/publicaciones/${id}/reaccion`);
+export const listarReacciones = (id, tipo, antesDe) =>
+  api.get(`/publicaciones/${id}/reacciones${consulta({ tipo, antesDe, limite: LIMITE_PAGINA })}`);
