@@ -705,6 +705,286 @@ body:has(.app) {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.resumen-reacciones:hover {
+  color: var(--texto);
+  text-decoration: underline;
+}
+
+/* ── Quién reaccionó (va en <body>: no hereda nada de .app) ── */
+/* Alto fijo: al cambiar de pestaña la ventana no salta; solo la lista hace scroll */
+.modal.modal-reacciones {
+  display: flex;
+  flex-direction: column;
+  width: min(480px, 100%);
+  height: min(600px, calc(100dvh - 2rem));
+  overflow: hidden;
+}
+.modal-reacciones .modal-cabecera {
+  border-bottom: none;
+}
+.modal-reacciones .modal-cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+.reacciones-pestanas {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.2rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid #3f3466;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-padding-inline: 0.75rem;
+}
+.reacciones-pestanas::-webkit-scrollbar {
+  display: none;
+}
+.reacciones-pestana {
+  --color-reaccion: var(--neon-cian);
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 3.6rem;
+  min-height: 2.9rem;
+  padding: 0 0.75rem;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.reacciones-pestana:hover {
+  background: rgb(255 255 255 / 0.05);
+  color: var(--texto);
+}
+.reacciones-pestana::after {
+  content: '';
+  position: absolute;
+  right: 0.5rem;
+  bottom: -1px;
+  left: 0.5rem;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-reaccion);
+  transform: scaleX(0);
+  transition: transform 0.2s ease-out;
+}
+.reacciones-pestana.activa {
+  color: var(--color-reaccion);
+}
+.reacciones-pestana.activa::after {
+  transform: scaleX(1);
+}
+.reacciones-pestana-total {
+  font-variant-numeric: tabular-nums;
+}
+.reacciones-panel {
+  flex: 1;
+  min-height: 0;
+  padding: 0.35rem 0.5rem 0.75rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.reacciones-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.reaccion-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0.5rem 0.3rem 0;
+  border-radius: 12px;
+}
+.reaccion-fila:not(.reaccion-esqueleto):hover {
+  background: rgb(255 255 255 / 0.05);
+}
+.reaccion-persona {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 12px;
+  color: var(--texto);
+  text-decoration: none;
+}
+.reaccion-persona:hover {
+  color: var(--texto);
+  text-decoration: none;
+}
+.reaccion-persona:focus-visible {
+  outline: 2px solid var(--neon-cian);
+  outline-offset: -2px;
+}
+.reaccion-avatar {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.reaccion-avatar .icono-reaccion {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2.5px #1b1530;
+}
+.reaccion-textos {
+  display: grid;
+  flex: 1;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.reaccion-textos strong,
+.reaccion-textos .suave {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reaccion-textos strong {
+  font-size: 0.97rem;
+}
+.reaccion-textos .suave {
+  font-size: 0.83rem;
+}
+.reaccion-tu {
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: rgb(61 224 255 / 0.14);
+  color: var(--neon-cian);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: 0.1em;
+}
+.reaccion-etiqueta {
+  flex-shrink: 0;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--color-reaccion) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-reaccion) 14%, transparent);
+  color: var(--color-reaccion);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.reacciones-mas {
+  display: block;
+  width: calc(100% - 1rem);
+  min-height: 2.75rem;
+  margin: 0.5rem auto 0;
+  border: 1px solid #3f3466;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--texto);
+  font-weight: 700;
+}
+.reacciones-mas:hover {
+  background: rgb(255 255 255 / 0.09);
+}
+.modal-reacciones .vacio {
+  padding: 3rem 1rem;
+}
+/* Filas de carga */
+.reaccion-esqueleto {
+  padding-left: 0.5rem;
+  min-height: 3.7rem;
+}
+.esqueleto {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.06) 25%,
+    rgb(255 255 255 / 0.13) 50%,
+    rgb(255 255 255 / 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: esqueleto-brillo 1.2s linear infinite;
+}
+.esqueleto-avatar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+.esqueleto-linea {
+  width: 55%;
+  height: 0.8rem;
+}
+.esqueleto-linea.corta {
+  width: 35%;
+  margin-top: 0.35rem;
+}
+@keyframes esqueleto-brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto {
+    animation: none;
+  }
+}
+/* Móvil: hoja de abajo con asa, alto fijo y filas táctiles más cómodas */
+@media (max-width: 860px) {
+  .modal.modal-reacciones {
+    width: 100%;
+    height: min(78dvh, 640px);
+  }
+  .modal-reacciones .modal-cabecera {
+    padding-top: 1.3rem;
+  }
+  .modal-reacciones .modal-cabecera::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    width: 2.6rem;
+    height: 4px;
+    border-radius: 4px;
+    background: rgb(255 255 255 / 0.22);
+    transform: translateX(-50%);
+  }
+  .modal-reacciones .modal-cerrar {
+    top: 0.85rem;
+  }
+  .reacciones-panel {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 420px) {
+  .reacciones-pestana {
+    min-width: 3.2rem;
+    padding: 0 0.6rem;
+  }
+  /* La reacción ya se ve sobre la foto: la etiqueta solo queda para lectores de pantalla */
+  .reaccion-etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 .resumen-iconos {
   display: inline-flex;
@@ -2438,4 +2718,356 @@ body:has(.app) {
   border-radius: 50%;
   background: var(--neon-rosa);
   box-shadow: 0 0 8px var(--neon-rosa);
+}
+
+/* ── Stickers (KLIPY) ─────────────────────────── */
+.sticker {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.sticker-no-disponible {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px dashed var(--borde);
+  border-radius: 12px;
+  color: var(--texto-suave);
+  font-size: 0.82rem;
+}
+
+/* Botón del sticker (en comentarios y en el chat) */
+.boton-sticker {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--texto-suave);
+  transition:
+    color 0.15s,
+    background 0.15s,
+    transform 0.15s;
+}
+.boton-sticker:hover:not(:disabled),
+.boton-sticker.activo {
+  background: rgb(255 61 216 / 0.14);
+  color: var(--neon-rosa);
+}
+.boton-sticker.activo {
+  transform: rotate(-8deg) scale(1.05);
+}
+
+/* Comentarios: el sticker va junto al botón de enviar, dentro de la caja */
+.app .form-comentario-caja.con-sticker input {
+  padding-right: 4.9rem;
+}
+.form-comentario-sticker {
+  position: absolute;
+  top: 50%;
+  right: 2.35rem;
+  width: 32px;
+  height: 32px;
+  translate: 0 -50%;
+}
+.app .comentario-burbuja.comentario-burbuja-sticker {
+  padding-bottom: 0.1rem;
+  background: none;
+}
+.sticker-comentario {
+  width: 120px;
+  margin: 0.1rem 0 0 0.5rem;
+}
+
+/* Chat: botón a la izquierda del campo; el sticker se ve sin burbuja de color */
+.app .chat-escribir {
+  align-items: center;
+}
+.chat-sticker {
+  width: 40px;
+  height: 40px;
+}
+.app .burbuja.burbuja-sticker {
+  padding: 0;
+  background: none;
+  color: var(--texto);
+}
+.burbuja-sticker small {
+  margin-top: 0.15rem;
+  color: var(--texto-suave);
+}
+.burbuja-mia.burbuja-sticker small {
+  text-align: right;
+}
+.sticker-chat {
+  width: 150px;
+}
+
+/* Selector: va en <body>, así que lleva sus propios colores */
+.stickers-panel {
+  --texto: #efeaff;
+  --texto-suave: #a99fc9;
+  --borde: #3f3466;
+  --peligro: #ff7aa8;
+  --peligro-suave: rgb(255 61 120 / 0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  background: #1b1530;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  color: var(--texto);
+  color-scheme: dark;
+}
+.stickers-flotante {
+  position: fixed;
+  z-index: 160;
+  width: 360px;
+  height: 430px;
+  border-radius: 18px;
+  animation: stickers-aparece 0.18s ease-out;
+}
+@keyframes stickers-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+.stickers-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(8 5 16 / 0.6);
+  animation: visor-entra 0.2s ease-out;
+}
+.stickers-hoja {
+  position: relative;
+  width: 100%;
+  height: min(72dvh, 580px);
+  padding-top: 0.6rem;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  animation: stickers-sube 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes stickers-sube {
+  from {
+    transform: translateY(100%);
+  }
+}
+.stickers-asa {
+  position: absolute;
+  top: 0.45rem;
+  left: 50%;
+  width: 2.6rem;
+  height: 4px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.22);
+  transform: translateX(-50%);
+}
+.stickers-cabecera {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0.2rem;
+}
+.stickers-buscador {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  height: 2.6rem;
+  padding: 0 0.4rem 0 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.07);
+  color: var(--texto-suave);
+  cursor: text;
+}
+.stickers-buscador:focus-within {
+  border-color: #3de0ff;
+  background: rgb(255 255 255 / 0.1);
+}
+.stickers-buscador input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--texto);
+  font-size: 1rem; /* 16px: iOS no hace zoom al enfocar */
+}
+.stickers-buscador input:focus {
+  outline: none;
+}
+.stickers-buscador input::-webkit-search-cancel-button {
+  display: none;
+}
+.stickers-limpiar,
+.stickers-cerrar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--texto);
+}
+.stickers-limpiar {
+  width: 26px;
+  height: 26px;
+}
+.stickers-cerrar {
+  width: 40px;
+  height: 40px;
+}
+.stickers-limpiar:hover,
+.stickers-cerrar:hover {
+  background: rgb(255 255 255 / 0.18);
+}
+.stickers-titulo {
+  flex-shrink: 0;
+  margin: 0.55rem 1rem 0.45rem;
+  overflow: hidden;
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.stickers-caja {
+  flex: 1;
+  min-height: 0;
+  padding: 0 0.6rem 0.6rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.stickers-rejilla {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stickers-opcion {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0.3rem;
+  border: none;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.03);
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.stickers-opcion img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.stickers-opcion:hover {
+  background: rgb(255 255 255 / 0.1);
+  transform: scale(1.06);
+}
+.stickers-opcion:active {
+  transform: scale(0.94);
+}
+.stickers-opcion:focus-visible {
+  outline: 2px solid #3de0ff;
+  outline-offset: -2px;
+}
+.stickers-esqueleto {
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.05) 25%,
+    rgb(255 255 255 / 0.11) 50%,
+    rgb(255 255 255 / 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: esqueleto-brillo 1.2s linear infinite;
+}
+.stickers-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 2.5rem 1rem;
+  color: var(--texto-suave);
+  text-align: center;
+}
+.stickers-centinela {
+  height: 1px;
+}
+.stickers-marca {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.45rem 0.9rem;
+  border-top: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-size: 0.72rem;
+  text-align: right;
+}
+.stickers-marca strong {
+  color: var(--texto);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 860px) {
+  .stickers-rejilla {
+    grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    gap: 0.45rem;
+  }
+  /* Sin hover en pantallas táctiles: no escalar al tocar */
+  .stickers-opcion:hover {
+    transform: none;
+  }
+  .sticker-chat {
+    width: 130px;
+  }
+}
+@media (max-width: 560px) {
+  .sticker-comentario {
+    width: 100px;
+  }
+  .sticker-chat {
+    width: 120px;
+  }
+  .chat-sticker {
+    width: 36px;
+    height: 36px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stickers-flotante,
+  .stickers-hoja,
+  .stickers-fondo,
+  .stickers-esqueleto {
+    animation: none;
+  }
+  .boton-sticker.activo,
+  .stickers-opcion:hover,
+  .stickers-opcion:active {
+    transform: none;
+  }
 }

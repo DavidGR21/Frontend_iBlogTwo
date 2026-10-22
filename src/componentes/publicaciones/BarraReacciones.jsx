@@ -1,6 +1,7 @@
 /**
  * Reacciones al estilo de Facebook.
- *  - ResumenReacciones: los iconos de las reacciones más usadas y el total.
+ *  - ResumenReacciones: los iconos de las reacciones más usadas y el total. Al pulsarlo se
+ *    abre ModalReacciones con quién reaccionó y cómo.
  *  - BotonReaccionar: un clic pone "Me gusta" (o quita la reacción propia). Al dejar el
  *    puntero encima (o mantener pulsado en el móvil, o ↑ con el teclado) sube el selector
  *    con las 7 reacciones, que aparecen una tras otra con un rebote.
@@ -12,6 +13,7 @@ import { REACCIONES } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
 import { IconoMeGusta } from '../iconos/Iconos.jsx';
 import { IconoReaccion } from '../iconos/IconoReaccion.jsx';
+import { ModalReacciones } from './ModalReacciones.jsx';
 
 const ESPERA_ABRIR = 450; // ms con el puntero encima antes de mostrar el selector
 const ESPERA_CERRAR = 350;
@@ -27,7 +29,8 @@ function recontar(reacciones = {}, antes, despues) {
   return nuevas;
 }
 
-export function ResumenReacciones({ reacciones = {} }) {
+export function ResumenReacciones({ publicacionId, reacciones = {} }) {
+  const [verQuien, setVerQuien] = useState(false);
   const usadas = REACCIONES.filter(({ tipo }) => reacciones[tipo] > 0).sort(
     (a, b) => reacciones[b.tipo] - reacciones[a.tipo],
   );
@@ -35,17 +38,29 @@ export function ResumenReacciones({ reacciones = {} }) {
   if (total === 0) return <span />;
 
   return (
-    <span
-      className="resumen-reacciones"
-      title={usadas.map(({ tipo, nombre }) => `${nombre}: ${reacciones[tipo]}`).join('\n')}
-    >
-      <span className="resumen-iconos">
-        {usadas.slice(0, 3).map(({ tipo }) => (
-          <IconoReaccion key={tipo} tipo={tipo} tamano={20} />
-        ))}
-      </span>
-      {total}
-    </span>
+    <>
+      <button
+        type="button"
+        className="resumen-reacciones"
+        title={usadas.map(({ tipo, nombre }) => `${nombre}: ${reacciones[tipo]}`).join('\n')}
+        aria-label={`Ver quién reaccionó (${total})`}
+        onClick={() => setVerQuien(true)}
+      >
+        <span className="resumen-iconos">
+          {usadas.slice(0, 3).map(({ tipo }) => (
+            <IconoReaccion key={tipo} tipo={tipo} tamano={20} />
+          ))}
+        </span>
+        {total}
+      </button>
+      {verQuien && (
+        <ModalReacciones
+          publicacionId={publicacionId}
+          reacciones={reacciones}
+          alCerrar={() => setVerQuien(false)}
+        />
+      )}
+    </>
   );
 }
 

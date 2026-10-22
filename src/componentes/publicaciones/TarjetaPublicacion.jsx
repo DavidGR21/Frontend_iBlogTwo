@@ -198,7 +198,7 @@ export function TarjetaPublicacion({
       )}
 
       <div className="post-resumen">
-        <ResumenReacciones reacciones={publicacion.reacciones} />
+        <ResumenReacciones publicacionId={publicacion.id} reacciones={publicacion.reacciones} />
         {totalComentarios > 0 && (
           <button
             type="button"

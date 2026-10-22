@@ -14,6 +14,7 @@ import {
   IconoCerrar,
   IconoConversaciones,
   IconoImagen,
+  IconoSticker,
 } from '../componentes/iconos/Iconos.jsx';
 import { PanelChat } from '../componentes/mensajes/PanelChat.jsx';
 import { MensajeError } from '../componentes/MensajeError.jsx';
@@ -49,6 +50,7 @@ export function Mensajes() {
         ...conversacion,
         ultimoMensaje: {
           contenido: mensaje.contenido,
+          sticker: mensaje.sticker ?? null,
           remitenteId: mensaje.remitenteId,
           creadoEn: mensaje.creadoEn,
         },
@@ -138,11 +140,16 @@ export function Mensajes() {
                     {c.ultimoMensaje ? (
                       <>
                         {c.ultimoMensaje.remitenteId === usuario.id && 'Tú: '}
-                        {c.ultimoMensaje.contenido ?? (
-                          <span className="con-icono">
-                            <IconoImagen tamano={15} /> Imagen
-                          </span>
-                        )}
+                        {c.ultimoMensaje.contenido ??
+                          (c.ultimoMensaje.sticker ? (
+                            <span className="con-icono">
+                              <IconoSticker tamano={15} /> Sticker
+                            </span>
+                          ) : (
+                            <span className="con-icono">
+                              <IconoImagen tamano={15} /> Imagen
+                            </span>
+                          ))}
                       </>
                     ) : (
                       'Sin mensajes'

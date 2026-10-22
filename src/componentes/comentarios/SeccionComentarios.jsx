@@ -79,9 +79,10 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
   });
 
   const acciones = {
-    async crear(contenido, comentarioPadreId) {
+    /** `datos` = { contenido } o { stickerId } */
+    async crear(datos, comentarioPadreId) {
       try {
-        agregar(await crearComentario({ publicacionId, contenido, comentarioPadreId }));
+        agregar(await crearComentario({ publicacionId, ...datos, comentarioPadreId }));
       } catch (e) {
         avisar(e.message, 'error');
         throw e;
@@ -105,7 +106,7 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
       if (!seguro) return;
       try {
         await eliminarComentario(id);
-        actualizar(id, (c) => ({ ...c, eliminado: true, contenido: null }));
+        actualizar(id, (c) => ({ ...c, eliminado: true, contenido: null, sticker: null }));
       } catch (e) {
         avisar(e.message, 'error');
       }
@@ -150,7 +151,11 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
         </button>
       )}
 
-      <FormComentario alEnviar={(texto) => acciones.crear(texto, undefined)} conAvatar />
+      <FormComentario
+        alEnviar={(contenido) => acciones.crear({ contenido })}
+        alEnviarSticker={(sticker) => acciones.crear({ stickerId: sticker.id })}
+        conAvatar
+      />
     </section>
   );
 }

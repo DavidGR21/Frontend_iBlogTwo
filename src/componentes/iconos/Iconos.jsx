@@ -111,6 +111,15 @@ export const IconoBuscar = (p) => (
   </Icono>
 );
 
+export const IconoSticker = (p) => (
+  <Icono {...p}>
+    <path d="M20.5 12.5V6A2.5 2.5 0 0 0 18 3.5H6A2.5 2.5 0 0 0 3.5 6v12A2.5 2.5 0 0 0 6 20.5h6.5z" />
+    <path d="M12.5 20.5v-4a4 4 0 0 1 4-4h4" />
+    <path d="M8.3 13.6c.9.9 2 1.3 3.2 1.3" />
+    <path d="M9 9.2v.3M14.5 9.2v.3" />
+  </Icono>
+);
+
 export const IconoMenu = (p) => (
   <Icono {...p}>
     <path d="M4 7h16M4 12h16M4 17h16" />

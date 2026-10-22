@@ -9,6 +9,7 @@ import { fechaCompleta, haceCuanto } from '../../utils/formato.js';
 import { Avatar } from '../Avatar.jsx';
 import { FormComentario } from './FormComentario.jsx';
 import { IconoRespuesta } from '../iconos/Iconos.jsx';
+import { Sticker } from '../stickers/Sticker.jsx';
 
 const MAX_NIVEL_VISUAL = 4; // a partir de aquí ya no se indenta más
 
@@ -20,9 +21,10 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
   const misRespuestas = respuestas[comentario.id];
   const esMio = comentario.autor.id === usuario?.id;
   const faltanPorCargar = !misRespuestas && comentario.totalRespuestas > 0;
+  const esSticker = Boolean(comentario.sticker) && !comentario.eliminado;
 
-  async function responder(texto) {
-    await acciones.crear(texto, comentario.id);
+  async function responder(datos) {
+    await acciones.crear(datos, comentario.id);
     setRespondiendo(false);
   }
 
@@ -35,7 +37,8 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
     <div className="comentario">
       <Avatar usuario={comentario.autor} tamano={32} ampliable />
       <div className="comentario-cuerpo">
-        <div className="comentario-burbuja">
+        {/* Con sticker: el nombre en la burbuja y el sticker debajo, sin fondo */}
+        <div className={`comentario-burbuja ${esSticker ? 'comentario-burbuja-sticker' : ''}`}>
           <Link to={`/u/${comentario.autor.nombreUsuario}`} className="comentario-autor">
             {comentario.autor.nombreUsuario}
           </Link>
@@ -48,10 +51,11 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
               valorInicial={comentario.contenido}
               autoFocus
             />
-          ) : (
+          ) : esSticker ? null : (
             <p className="texto-libre">{comentario.contenido}</p>
           )}
         </div>
+        {esSticker && <Sticker sticker={comentario.sticker} className="sticker-comentario" />}
 
         <div className="comentario-acciones">
           <span title={fechaCompleta(comentario.creadoEn)}>{haceCuanto(comentario.creadoEn)}</span>
@@ -62,9 +66,11 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
           )}
           {esMio && !comentario.eliminado && (
             <>
-              <button className="boton-enlace" onClick={() => setEditando(!editando)}>
-                {editando ? 'Cancelar' : 'Editar'}
-              </button>
+              {!esSticker && (
+                <button className="boton-enlace" onClick={() => setEditando(!editando)}>
+                  {editando ? 'Cancelar' : 'Editar'}
+                </button>
+              )}
               <button className="boton-enlace" onClick={() => acciones.eliminar(comentario.id)}>
                 Eliminar
               </button>
@@ -74,7 +80,8 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
 
         {respondiendo && (
           <FormComentario
-            alEnviar={responder}
+            alEnviar={(contenido) => responder({ contenido })}
+            alEnviarSticker={(sticker) => responder({ stickerId: sticker.id })}
             placeholder={`Responder a ${comentario.autor.nombreUsuario}…`}
             autoFocus
           />

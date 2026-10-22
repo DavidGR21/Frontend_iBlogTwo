@@ -4,6 +4,7 @@
  *  - Envío por Socket.io con confirmación (ack): el mensaje aparece al instante
  *    como "pendiente" y se reemplaza por el real cuando el servidor lo guarda.
  *  - Indicador de "escribiendo…" y marca de leído.
+ *  - Stickers de KLIPY: se envían solos ({ stickerId }) y se dibujan sin burbuja de color.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
@@ -18,6 +19,8 @@ import { Avatar } from '../Avatar.jsx';
 import { Cargando } from '../Cargando.jsx';
 import { MensajeError } from '../MensajeError.jsx';
 import { IconoFlechaArriba } from '../iconos/Iconos.jsx';
+import { BotonSticker } from '../stickers/BotonSticker.jsx';
+import { Sticker } from '../stickers/Sticker.jsx';
 
 const ESPERA_ACK_MS = 10_000;
 const INTERVALO_ESCRIBIENDO_MS = 2_000;
@@ -50,7 +53,8 @@ export function PanelChat({ conversacion, alLeer }) {
           (m) =>
             m.pendiente &&
             m.remitenteId === mensaje.remitenteId &&
-            m.contenido === mensaje.contenido,
+            m.contenido === mensaje.contenido &&
+            (m.sticker?.id ?? null) === (mensaje.sticker?.id ?? null),
         );
         const sinPendiente = pendiente === -1 ? lista : lista.filter((_, i) => i !== pendiente);
         return [mensaje, ...sinPendiente];
@@ -104,31 +108,32 @@ export function PanelChat({ conversacion, alLeer }) {
     }
   }
 
-  function enviar(evento) {
-    evento.preventDefault();
-    const contenido = texto.trim();
-    if (!contenido || !socket) return;
-
+  /**
+   * Muestra el mensaje como "pendiente" y lo manda por el socket.
+   * `datos` = { contenido } o { stickerId }; `vista` es lo que se dibuja mientras tanto.
+   */
+  function emitir(datos, vista, alFallar) {
     const temporal = {
       id: `pendiente-${Date.now()}`,
       conversacionId: conversacion.id,
       remitenteId: usuario.id,
-      contenido,
+      contenido: null,
+      sticker: null,
+      ...vista,
       creadoEn: new Date().toISOString(),
       pendiente: true,
     };
     setMensajes((lista) => [temporal, ...lista]);
-    setTexto('');
 
     socket
       .timeout(ESPERA_ACK_MS)
       .emit(
         EVENTOS.MENSAJE_ENVIAR,
-        { conversacionId: conversacion.id, contenido },
+        { conversacionId: conversacion.id, ...datos },
         (sinRespuesta, respuesta) => {
           if (sinRespuesta || !respuesta?.ok) {
             setMensajes((lista) => lista.filter((m) => m.id !== temporal.id));
-            setTexto(contenido);
+            alFallar?.();
             avisar(
               sinRespuesta
                 ? 'El servidor no respondió. Intenta de nuevo.'
@@ -145,6 +150,20 @@ export function PanelChat({ conversacion, alLeer }) {
           });
         },
       );
+  }
+
+  function enviar(evento) {
+    evento.preventDefault();
+    const contenido = texto.trim();
+    if (!contenido || !socket) return;
+    setTexto('');
+    emitir({ contenido }, { contenido }, () => setTexto(contenido));
+  }
+
+  function enviarSticker(sticker) {
+    if (!socket) return;
+    const { id, titulo, url, ancho, alto } = sticker;
+    emitir({ stickerId: id }, { sticker: { id, titulo, url, ancho, alto } });
   }
 
   const otro = conversacion.otroUsuario;
@@ -170,11 +189,12 @@ export function PanelChat({ conversacion, alLeer }) {
         {[...mensajes].reverse().map((m) => (
           <div
             key={m.id}
-            className={`burbuja ${m.remitenteId === usuario.id ? 'burbuja-mia' : ''} ${m.pendiente ? 'burbuja-pendiente' : ''}`}
+            className={`burbuja ${m.remitenteId === usuario.id ? 'burbuja-mia' : ''} ${m.pendiente ? 'burbuja-pendiente' : ''} ${m.sticker ? 'burbuja-sticker' : ''}`}
           >
             {m.imagenUrl && (
               <img src={m.imagenUrl} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
             )}
+            {m.sticker && <Sticker sticker={m.sticker} className="sticker-chat" />}
             {m.contenido && <span className="texto-libre">{m.contenido}</span>}
             <small>{m.pendiente ? 'Enviando…' : hora(m.creadoEn)}</small>
           </div>
@@ -184,6 +204,11 @@ export function PanelChat({ conversacion, alLeer }) {
       <div className="escribiendo">{otroEscribe && `${otro.nombres} está escribiendo…`}</div>
 
       <form className="chat-escribir" onSubmit={enviar}>
+        <BotonSticker
+          className="chat-sticker"
+          alElegir={enviarSticker}
+          deshabilitado={!conectado}
+        />
         <input
           value={texto}
           onChange={(e) => avisarQueEscribo(e.target.value)}
