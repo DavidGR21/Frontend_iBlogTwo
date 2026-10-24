@@ -1,6 +1,6 @@
 /** Editar mi perfil y mi foto. */
 import { useRef, useState } from 'react';
-import { subirImagen } from '../api/archivos.js';
+import { descartarImagenes, subirImagen } from '../api/archivos.js';
 import { actualizarPerfil, obtenerYo } from '../api/usuarios.js';
 import { Avatar } from '../componentes/Avatar.jsx';
 import { Cargando } from '../componentes/Cargando.jsx';
@@ -51,12 +51,15 @@ function FormAjustes({ yo, alGuardar }) {
     evento.target.value = '';
     if (!archivo) return;
     setSubiendoFoto(true);
+    let subido = null;
     try {
-      const subido = await subirImagen(archivo, 'perfil');
+      subido = await subirImagen(archivo, 'perfil');
+      // La foto anterior la borra del bucket el backend al guardar la nueva
       alGuardar(await actualizarPerfil({ fotoPerfilId: subido.id }));
       avisar('Foto actualizada');
     } catch (e) {
       avisar(e.message, 'error');
+      if (subido) descartarImagenes([subido.id]);
     } finally {
       setSubiendoFoto(false);
     }

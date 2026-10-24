@@ -33,3 +33,15 @@ export function fechaCompleta(fecha) {
 export function nombreCompleto(usuario) {
   return [usuario?.nombres, usuario?.apellidos].filter(Boolean).join(' ') || usuario?.nombreUsuario;
 }
+
+/** "12,3 MB" */
+export function tamanoLegible(bytes) {
+  const unidades = ['B', 'KB', 'MB', 'GB'];
+  let valor = bytes;
+  let i = 0;
+  while (valor >= 1024 && i < unidades.length - 1) {
+    valor /= 1024;
+    i++;
+  }
+  return `${valor.toLocaleString('es', { maximumFractionDigits: i ? 1 : 0 })} ${unidades[i]}`;
+}

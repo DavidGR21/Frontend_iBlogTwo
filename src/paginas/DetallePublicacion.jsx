@@ -28,6 +28,11 @@ export function DetallePublicacion() {
     if (publicacionId === id) setDatos((p) => p && { ...p, reacciones });
   });
 
+  // Si la eliminan (su autor o un administrador) mientras se está viendo, se vuelve al inicio
+  useEventoSocket(EVENTOS.PUBLICACION_ELIMINADA, ({ publicacionId }) => {
+    if (publicacionId === id) navegar('/', { replace: true });
+  });
+
   if (cargando) return <Cargando />;
   if (error) return <MensajeError error={error} alReintentar={recargar} />;
 
