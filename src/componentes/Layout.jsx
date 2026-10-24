@@ -25,6 +25,7 @@ import {
   IconoCerrar,
   IconoComentario,
   IconoCrear,
+  IconoEscudo,
   IconoInicio,
   IconoMenu,
   IconoSalir,
@@ -108,12 +109,16 @@ export function Layout() {
     if (pathname !== '/') navegar('/');
   }
 
+  const esAdmin = usuario?.rol === 'admin';
+
   const anchoContenido =
     pathname === '/'
       ? 'contenido-inicio'
       : pathname.startsWith('/mensajes')
         ? 'contenido-ancho contenido-mensajes'
-        : '';
+        : pathname.startsWith('/admin')
+          ? 'contenido-ancho'
+          : '';
 
   return (
     <div className="app">
@@ -139,6 +144,7 @@ export function Layout() {
                   Mensajes
                   <Contador cantidad={mensajes} que="mensajes sin leer" />
                 </NavLink>
+                {esAdmin && <NavLink to="/admin">Admin</NavLink>}
               </nav>
               <nav className="navegacion navegacion-cuenta">
                 <NavLink to={`/u/${usuario.nombreUsuario}`} className="nav-perfil">
@@ -220,6 +226,11 @@ export function Layout() {
               <IconoComentario /> Mensajes
               <Contador cantidad={mensajes} que="mensajes sin leer" />
             </NavLink>
+            {esAdmin && (
+              <NavLink to="/admin">
+                <IconoEscudo /> Administración
+              </NavLink>
+            )}
             <NavLink to="/ajustes">
               <IconoAjustes /> Ajustes
             </NavLink>
