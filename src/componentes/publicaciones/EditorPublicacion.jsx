@@ -4,7 +4,7 @@
  * envía la lista final de archivoIds (solo si las imágenes cambiaron).
  */
 import { useEffect, useRef, useState } from 'react';
-import { subirImagen, validarImagen } from '../../api/archivos.js';
+import { descartarImagenes, subirImagen, validarImagen } from '../../api/archivos.js';
 import { ErrorApi } from '../../api/cliente.js';
 import { editarPublicacion } from '../../api/publicaciones.js';
 import { MAX_IMAGENES_POST, TIPOS_IMAGEN } from '../../config.js';
@@ -60,6 +60,7 @@ export function EditorPublicacion({ publicacion, alGuardar, alCancelar }) {
     if (!texto.trim()) return;
     setError(null);
     setEstado('Guardando');
+    const nuevasSubidas = []; // ids de las imágenes nuevas ya subidas al bucket
     try {
       const cambios = { contenido: texto.trim() };
       if (cambiaronImagenes) {
@@ -67,7 +68,9 @@ export function EditorPublicacion({ publicacion, alGuardar, alCancelar }) {
         for (const imagen of imagenes) {
           if (imagen.archivo) {
             setEstado(`Subiendo ${archivoIds.length + 1}/${imagenes.length}`);
-            archivoIds.push((await subirImagen(imagen.archivo, 'post')).id);
+            const { id } = await subirImagen(imagen.archivo, 'post');
+            nuevasSubidas.push(id);
+            archivoIds.push(id);
           } else {
             archivoIds.push(imagen.id);
           }
@@ -79,6 +82,8 @@ export function EditorPublicacion({ publicacion, alGuardar, alCancelar }) {
     } catch (e) {
       setError(e);
       setEstado(null);
+      // No se guardó: las nuevas no quedan enlazadas (las quitadas las borra el backend al guardar)
+      descartarImagenes(nuevasSubidas);
     }
   }
 

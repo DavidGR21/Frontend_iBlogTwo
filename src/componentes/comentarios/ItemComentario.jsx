@@ -20,6 +20,7 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
 
   const misRespuestas = respuestas[comentario.id];
   const esMio = comentario.autor.id === usuario?.id;
+  const moderando = !esMio && usuario?.rol === 'admin';
   const faltanPorCargar = !misRespuestas && comentario.totalRespuestas > 0;
   const esSticker = Boolean(comentario.sticker) && !comentario.eliminado;
 
@@ -75,6 +76,14 @@ export function ItemComentario({ comentario, respuestas, acciones, nivel = 0 }) 
                 Eliminar
               </button>
             </>
+          )}
+          {moderando && !comentario.eliminado && (
+            <button
+              className="boton-enlace"
+              onClick={() => acciones.eliminar(comentario.id, { comoAdmin: true })}
+            >
+              Eliminar (admin)
+            </button>
           )}
         </div>
 

@@ -225,6 +225,22 @@ export const IconoOjoTachado = (p) => (
   </Icono>
 );
 
+/** Escudo: panel de administración y acciones de moderación. */
+export const IconoEscudo = (p) => (
+  <Icono {...p}>
+    <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6z" />
+    <path d="m9 12 2.2 2.2L15.5 10" />
+  </Icono>
+);
+
+/** Círculo tachado: suspender (banear) una cuenta. */
+export const IconoProhibido = (p) => (
+  <Icono {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="m6 6 12 12" />
+  </Icono>
+);
+
 /** Icono de cada visibilidad de publicación (mismos valores que VISIBILIDADES). */
 export const ICONOS_VISIBILIDAD = {
   publico: IconoMundo,

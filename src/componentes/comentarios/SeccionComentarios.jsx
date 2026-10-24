@@ -7,6 +7,7 @@
  * por eso se lleva un registro de ids ya vistos.
  */
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { eliminarComentario as eliminarComoAdmin } from '../../api/admin.js';
 import {
   crearComentario,
   editarComentario,
@@ -97,15 +98,18 @@ export function SeccionComentarios({ publicacionId, alAgregarComentario }) {
         throw e;
       }
     },
-    async eliminar(id) {
+    // `comoAdmin`: un administrador borrando el comentario de otra persona (moderación)
+    async eliminar(id, { comoAdmin = false } = {}) {
       const seguro = await confirmar({
-        titulo: '¿Eliminar comentario?',
-        mensaje: 'El comentario se quitará de la publicación.',
+        titulo: comoAdmin ? '¿Eliminar como administrador?' : '¿Eliminar comentario?',
+        mensaje: comoAdmin
+          ? 'El comentario se quitará de la publicación y quedará anotado en el registro de administración.'
+          : 'El comentario se quitará de la publicación.',
         confirmar: 'Eliminar',
       });
       if (!seguro) return;
       try {
-        await eliminarComentario(id);
+        await (comoAdmin ? eliminarComoAdmin : eliminarComentario)(id);
         actualizar(id, (c) => ({ ...c, eliminado: true, contenido: null, sticker: null }));
       } catch (e) {
         avisar(e.message, 'error');
