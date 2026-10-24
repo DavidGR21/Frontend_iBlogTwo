@@ -1,7 +1,8 @@
 /**
  * Lista paginada de publicaciones (feed o perfil).
  * Recibe el resultado de usePaginado y se encarga de editar/eliminar en la lista
- * y de actualizar los contadores de reacciones que llegan por socket.
+ * y de actualizar los contadores de reacciones que llegan por socket (y de quitar las que
+ * se eliminan mientras está abierta).
  */
 import { useEventoSocket } from '../../hooks/useEventoSocket.js';
 import { EVENTOS } from '../../sockets/eventos.js';
@@ -25,6 +26,9 @@ export function ListaPublicaciones({ lista, textoVacio = 'Todavía no hay public
       actuales.map((p) => (p.id === publicacionId ? { ...p, reacciones } : p)),
     );
   });
+
+  // Eliminada por su autor en otra pestaña o por un administrador
+  useEventoSocket(EVENTOS.PUBLICACION_ELIMINADA, ({ publicacionId }) => quitar(publicacionId));
 
   return (
     <>

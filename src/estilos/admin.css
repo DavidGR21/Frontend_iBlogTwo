@@ -1,0 +1,462 @@
+/* Panel de administración (paginas/Admin.jsx). Usa las variables del tema de app.css. */
+
+.admin-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  color: var(--neon-cian);
+}
+.admin-cabecera h1 {
+  margin: 0;
+  color: var(--texto);
+}
+.admin-cabecera p {
+  margin: 0;
+}
+
+/* ── Etiquetas de estado ──────────────────────── */
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--texto-suave);
+}
+.insignia-admin {
+  background: rgb(61 224 255 / 0.16);
+  color: var(--neon-cian);
+}
+.insignia-peligro {
+  background: var(--peligro-suave);
+  color: var(--peligro);
+}
+.insignia-aviso {
+  background: rgb(255 224 61 / 0.14);
+  color: var(--neon-amarillo);
+}
+.insignia-ok {
+  background: rgb(95 227 161 / 0.14);
+  color: var(--exito);
+}
+
+/* ── Cifras del resumen ───────────────────────── */
+.admin-cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.admin-cifra {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+.admin-cifra strong {
+  font-size: 1.7rem;
+  line-height: 1.1;
+  color: var(--neon-cian);
+  font-variant-numeric: tabular-nums;
+}
+.admin-cifra span {
+  font-weight: 650;
+}
+.admin-cifra small {
+  color: var(--texto-suave);
+  font-size: 0.78rem;
+}
+.admin-cifra-peligro strong {
+  color: var(--peligro);
+}
+.admin-cifra-aviso strong {
+  color: var(--neon-amarillo);
+}
+
+/* ── Gráfico de actividad ─────────────────────── */
+.admin-grafico {
+  margin: 0;
+}
+.admin-grafico-barras {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 0.35rem;
+  height: 180px;
+  padding-bottom: 1.4rem;
+}
+.admin-grafico-dia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.admin-grafico-grupo {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--borde);
+}
+.admin-barra {
+  flex: 1;
+  max-width: 10px;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+}
+.admin-barra-registros {
+  background: var(--neon-cian);
+}
+.admin-barra-publicaciones {
+  background: var(--neon-rosa);
+}
+.admin-barra-comentarios {
+  background: var(--neon-amarillo);
+}
+.admin-grafico-etiqueta {
+  position: absolute;
+  bottom: -1.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+/* Una etiqueta sí y otra no, para que no se monten */
+.admin-grafico-dia:nth-child(odd) .admin-grafico-etiqueta {
+  visibility: hidden;
+}
+.admin-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+.admin-leyenda i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+.admin-dos-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.admin-dos-columnas .tarjeta {
+  margin-bottom: 0;
+}
+.admin-ranking {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-ranking li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+.admin-ranking li:last-child {
+  border-bottom: none;
+}
+.admin-almacenamiento {
+  display: grid;
+  margin: 0 0 0.5rem;
+}
+.admin-almacenamiento strong {
+  font-size: 1.6rem;
+  color: var(--neon-cian);
+}
+
+/* ── Filtros y listas ─────────────────────────── */
+.admin-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.admin-filtros .buscador-caja {
+  flex: 1 1 260px;
+}
+.admin-filtros .chips {
+  flex-wrap: wrap;
+  border-radius: 18px;
+}
+.admin-filtro-autor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: -0.4rem 0 1rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.9rem;
+  border-radius: 999px;
+  background: var(--primario-suave);
+}
+.admin-filtro-autor .buscador-limpiar {
+  position: static;
+}
+.admin-lista {
+  padding: 0.3rem 1rem;
+}
+.admin-mas {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.app .lista-personas li.admin-usuario {
+  padding: 0;
+}
+.admin-usuario-boton {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.8rem 0.4rem;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+.admin-usuario-boton:hover {
+  background: rgb(255 255 255 / 0.04);
+}
+.admin-usuario-texto {
+  display: grid;
+  min-width: 0;
+}
+.admin-usuario-texto .suave {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+.admin-usuario-nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ── Publicaciones y comentarios ──────────────── */
+.admin-autor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.admin-autor-texto {
+  display: grid;
+  line-height: 1.25;
+}
+.admin-autor-texto .suave {
+  font-size: 0.8rem;
+}
+.admin-contenido.eliminado {
+  opacity: 0.7;
+  border-style: dashed;
+}
+.admin-contenido-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.admin-contenido-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.82rem;
+}
+.admin-contenido-texto {
+  margin: 0.7rem 0;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+.admin-contenido-contexto {
+  margin: 0.4rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-miniaturas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+.admin-miniaturas button {
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  overflow: hidden;
+  background: none;
+}
+.admin-miniaturas img {
+  display: block;
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+}
+.admin-contenido-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+.admin-contenido-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+/* ── Registro ─────────────────────────────────── */
+.admin-registro {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-registro li {
+  display: grid;
+  justify-items: start;
+  gap: 0.25rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+.admin-registro li:last-child {
+  border-bottom: none;
+}
+.admin-registro-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.admin-registro .boton-enlace {
+  padding-left: 0;
+}
+
+/* ── Ficha de una cuenta ──────────────────────── */
+/* Va en un portal, fuera de .app: se le dan las variables del tema */
+.modal.admin-ficha {
+  --neon-cian: #3de0ff;
+  --neon-amarillo: #ffe03d;
+  --tinta: #120c1f;
+  --fondo: rgb(42 34 69 / 0.72);
+  --superficie: rgb(27 21 48 / 0.84);
+  --borde: #3f3466;
+  --texto: #efeaff;
+  --texto-suave: #a99fc9;
+  --primario: var(--neon-cian);
+  --primario-texto: var(--tinta);
+  --peligro: #ff7aa8;
+  --peligro-suave: rgb(255 61 120 / 0.14);
+  --exito: #5fe3a1;
+  width: min(600px, 100%);
+}
+.admin-ficha-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+.admin-ficha-cabecera h3 {
+  margin: 0;
+}
+.admin-ficha-cabecera p {
+  margin: 0.1rem 0 0.35rem;
+  overflow-wrap: anywhere;
+}
+.admin-insignias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.admin-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+.admin-datos div {
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.04);
+}
+.admin-datos dt {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+.admin-datos dd {
+  margin: 0;
+  font-weight: 700;
+}
+.admin-ficha-enlaces,
+.admin-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+}
+.admin-acciones {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--borde);
+}
+.admin-acciones .suave {
+  margin: 0;
+}
+.admin-suspender {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--borde);
+}
+.admin-suspender p {
+  margin: 0;
+}
+.formulario label.admin-casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+.admin-casilla input {
+  width: auto;
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 720px) {
+  .admin-dos-columnas {
+    grid-template-columns: 1fr;
+  }
+  .admin-cifras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-cifra strong {
+    font-size: 1.4rem;
+  }
+  .admin-grafico-barras {
+    gap: 0.15rem;
+  }
+  .admin-grafico-dia:nth-child(4n + 2) .admin-grafico-etiqueta {
+    visibility: hidden;
+  }
+}

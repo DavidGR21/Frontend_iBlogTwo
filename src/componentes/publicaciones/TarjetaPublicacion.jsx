@@ -1,10 +1,12 @@
 /**
  * Una publicación: autor, texto, imágenes, resumen de reacciones, botones de reaccionar y
  * comentar, y los comentarios desplegados dentro de la tarjeta.
- * El autor puede editarla o eliminarla desde el menú "⋯".
+ * El autor puede editarla o eliminarla desde el menú "⋯"; un administrador puede eliminar
+ * las de cualquiera (queda en el registro de administración).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
+import { eliminarPublicacion as eliminarComoAdmin } from '../../api/admin.js';
 import { eliminarPublicacion } from '../../api/publicaciones.js';
 import { VISIBILIDADES } from '../../config.js';
 import { useAvisos } from '../../hooks/useAvisos.js';
@@ -21,13 +23,15 @@ import {
   IconoBorrar,
   IconoComentario,
   IconoEditar,
+  IconoEscudo,
   IconoMas,
 } from '../iconos/Iconos.jsx';
 import { BotonReaccionar, ResumenReacciones } from './BarraReacciones.jsx';
 import { EditorPublicacion } from './EditorPublicacion.jsx';
 import { GaleriaImagenes } from './GaleriaImagenes.jsx';
 
-function MenuPublicacion({ alEditar, alEliminar }) {
+/** Sin `alEditar` solo ofrece eliminar (un administrador moderando una publicación ajena). */
+function MenuPublicacion({ alEditar, alEliminar, textoEliminar = 'Eliminar publicación' }) {
   const [abierto, setAbierto] = useState(false);
   const raiz = useRef(null);
 
@@ -62,13 +66,15 @@ function MenuPublicacion({ alEditar, alEliminar }) {
       </button>
       {abierto && (
         <div className="post-menu-lista" role="menu">
-          <button type="button" role="menuitem" onClick={elegir(alEditar)}>
-            <IconoEditar tamano={18} />
-            Editar publicación
-          </button>
+          {alEditar && (
+            <button type="button" role="menuitem" onClick={elegir(alEditar)}>
+              <IconoEditar tamano={18} />
+              Editar publicación
+            </button>
+          )}
           <button type="button" role="menuitem" className="peligro" onClick={elegir(alEliminar)}>
-            <IconoBorrar tamano={18} />
-            Eliminar publicación
+            {alEditar ? <IconoBorrar tamano={18} /> : <IconoEscudo tamano={18} />}
+            {textoEliminar}
           </button>
         </div>
       )}
@@ -110,6 +116,7 @@ export function TarjetaPublicacion({
 
   const { autor } = publicacion;
   const esMia = autor.id === usuario?.id;
+  const moderando = !esMia && usuario?.rol === 'admin';
   const visibilidad = VISIBILIDADES.find((v) => v.valor === publicacion.visibilidad);
   const IconoVisibilidad = ICONOS_VISIBILIDAD[publicacion.visibilidad];
   const totalComentarios = publicacion.totalComentarios ?? 0;
@@ -130,14 +137,15 @@ export function TarjetaPublicacion({
 
   async function eliminar() {
     const seguro = await confirmar({
-      titulo: '¿Eliminar publicación?',
-      mensaje:
-        'Se borrará la publicación junto con sus imágenes, reacciones y comentarios. No se puede deshacer.',
+      titulo: moderando ? '¿Eliminar como administrador?' : '¿Eliminar publicación?',
+      mensaje: moderando
+        ? `Se borrará la publicación de @${autor.nombreUsuario} junto con sus imágenes. Quedará anotado en el registro de administración.`
+        : 'Se borrará la publicación junto con sus imágenes, reacciones y comentarios. No se puede deshacer.',
       confirmar: 'Eliminar',
     });
     if (!seguro) return;
     try {
-      await eliminarPublicacion(publicacion.id);
+      await (moderando ? eliminarComoAdmin : eliminarPublicacion)(publicacion.id);
       avisar('Publicación eliminada');
       alEliminar(publicacion.id);
     } catch (e) {
@@ -174,6 +182,7 @@ export function TarjetaPublicacion({
         {esMia && !editando && (
           <MenuPublicacion alEditar={() => setEditando(true)} alEliminar={eliminar} />
         )}
+        {moderando && <MenuPublicacion alEliminar={eliminar} textoEliminar="Eliminar (admin)" />}
       </header>
 
       {editando ? (

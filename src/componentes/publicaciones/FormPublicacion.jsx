@@ -6,7 +6,7 @@
  * avance (cada imagen subida + la creación del post) y cada vista previa marca su estado.
  */
 import { useEffect, useRef, useState } from 'react';
-import { subirImagen, validarImagen } from '../../api/archivos.js';
+import { descartarImagenes, subirImagen, validarImagen } from '../../api/archivos.js';
 import { ErrorApi } from '../../api/cliente.js';
 import { crearPublicacion } from '../../api/publicaciones.js';
 import {
@@ -82,8 +82,8 @@ export function FormPublicacion({ alPublicar, sinCabecera = false }) {
     if (!contenido.trim() || publicando) return;
     setError(null);
     setAvance({ subidas: 0, creando: false, listo: false });
+    const archivoIds = [];
     try {
-      const archivoIds = [];
       for (const { archivo } of imagenes) {
         const subido = await subirImagen(archivo, 'post');
         archivoIds.push(subido.id);
@@ -105,6 +105,8 @@ export function FormPublicacion({ alPublicar, sinCabecera = false }) {
       alPublicar(publicacion);
     } catch (e) {
       setError(e);
+      // La publicación no se creó: las imágenes que sí se subieron no deben quedar en el bucket
+      descartarImagenes(archivoIds);
     } finally {
       setAvance(null);
     }
