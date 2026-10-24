@@ -29,6 +29,7 @@ Códigos que el frontend trata de forma especial:
 | ---------------------- | ------ | ------------------------------------------------------------- |
 | `NO_AUTENTICADO`       | 401    | Intenta `POST /auth/refrescar` una vez; si falla, va al login |
 | `CORREO_NO_VERIFICADO` | 403    | En el login ofrece "Reenviar correo de verificación"          |
+| `CUENTA_SUSPENDIDA`    | 403    | En el login muestra el mensaje (incluye el motivo del baneo)  |
 
 ## Paginación por cursor
 
@@ -47,7 +48,7 @@ Para la siguiente página el frontend envía `?antesDe=<siguienteCursor>&limite=
 // UsuarioYo: la cuenta del usuario con sesión
 { "id": "uuid", "nombreUsuario": "david", "correo": "david@…", "nombres": "David", "apellidos": "Giler",
   "biografia": "…", "pais": "EC", "telefono": "+593…", "fechaNacimiento": "2001-05-10",
-  "fotoPerfilUrl": "https://…" | null, "fotoPerfilId": "uuid" | null }
+  "fotoPerfilUrl": "https://…" | null, "fotoPerfilId": "uuid" | null, "rol": "usuario" | "admin" }
 
 // Publicacion
 { "id": "uuid", "autor": UsuarioResumen, "contenido": "texto", "visibilidad": "publico|amigos|privado",
@@ -193,6 +194,53 @@ reciben `stickerId` (solo, sin texto ni imagen); los comentarios de sticker no s
 
 Sin llave, `/tendencias` y `/buscar` responden `503 NO_DISPONIBLE`.
 
+## Administración — `/admin` 🔒 (solo `rol: "admin"`, si no `403 PROHIBIDO`)
+
+El rol vive en la BD (`usuarios.rol`); se asigna desde la terminal del backend con
+`npm run admin -- <nombre_usuario>`. Un admin no puede moderarse a sí mismo ni a otro admin.
+
+| Método | Ruta                              | Cuerpo / Query                                               | Respuesta                                        |
+| ------ | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
+| GET    | `/estadisticas`                   |                                                              | `Estadisticas`                                   |
+| GET    | `/usuarios`                       | `?buscar&filtro=activos\|suspendidos\|sin_verificar\|admins` | `{ items: UsuarioAdmin[], siguienteCursor }`     |
+| GET    | `/usuarios/:id`                   |                                                              | `UsuarioAdminDetalle`                            |
+| POST   | `/usuarios/:id/suspender`         | `{ motivo?, borrarContenido? }`                              | `UsuarioAdminDetalle`                            |
+| POST   | `/usuarios/:id/reactivar`         |                                                              | `UsuarioAdminDetalle`                            |
+| POST   | `/usuarios/:id/verificar-correo`  |                                                              | `UsuarioAdminDetalle`                            |
+| POST   | `/usuarios/:id/cerrar-sesiones`   |                                                              | `UsuarioAdminDetalle`                            |
+| DELETE | `/usuarios/:id/foto`              |                                                              | `UsuarioAdminDetalle`                            |
+| DELETE | `/usuarios/:id/contenido`         |                                                              | `{ publicaciones, comentarios }` (cuántos borró) |
+| GET    | `/publicaciones`                  | `?buscar&autorId&estado=vivas\|eliminadas\|todas`            | `{ items: PublicacionAdmin[], siguienteCursor }` |
+| DELETE | `/publicaciones/:id`              |                                                              | `204`                                            |
+| GET    | `/comentarios`                    | `?buscar&autorId&estado=vivas\|eliminadas\|todas`            | `{ items: ComentarioAdmin[], siguienteCursor }`  |
+| DELETE | `/comentarios/:id`                |                                                              | `204`                                            |
+| GET    | `/registro`                       | `?antesDe&limite`                                            | `{ items: AccionAdmin[], siguienteCursor }`      |
+| POST   | `/mantenimiento/limpiar-archivos` |                                                              | `{ pendientes, sinUso }` (archivos borrados)     |
+
+`buscar` en `/usuarios` busca por nombre de usuario, nombre o correo exacto. Suspender cierra
+sus sesiones y su tiempo real al instante; mientras siga suspendida su perfil y su contenido no
+se ven. Borrar una publicación (su autor o un admin) también borra sus imágenes del bucket.
+
+```jsonc
+// UsuarioAdmin (UsuarioAdminDetalle añade biografia, pais, suspendidoPor, totalAmigos,
+// totalReacciones, totalMensajes y sesionesActivas)
+{ "id", "nombreUsuario", "nombres", "apellidos", "correo", "fotoPerfilUrl", "rol",
+  "estado": "activo|suspendido|eliminado", "correoVerificado": true, "creadoEn", "ultimoAccesoEn",
+  "suspendidoEn", "motivoSuspension", "totalPublicaciones", "totalComentarios" }
+
+// PublicacionAdmin — autor = UsuarioResumen + "estado"
+{ "id", "autor", "contenido", "visibilidad", "imagenes": [{ "id", "url" }], "totalReacciones",
+  "totalComentarios", "editada", "creadaEn", "eliminadaEn": null, "eliminadaPor": "admin" | null }
+
+// ComentarioAdmin
+{ "id", "publicacionId", "comentarioPadreId", "autor", "contenido", "sticker", "creadoEn",
+  "eliminadoEn", "eliminadoPor", "publicacionExtracto", "publicacionEliminada" }
+
+// AccionAdmin
+{ "id", "accion": "suspender_usuario|eliminar_publicacion|…", "objetivoTipo", "objetivoId",
+  "detalle", "admin": "nombreUsuario", "creadaEn" }
+```
+
 ---
 
 ## Socket.io
@@ -216,6 +264,7 @@ frontend renueva el token y reconecta.
 | Evento                     | Datos                                               | A quién                             |
 | -------------------------- | --------------------------------------------------- | ----------------------------------- |
 | `publicacion:nueva`        | `Publicacion`                                       | todos (solo si es pública)          |
+| `publicacion:eliminada`    | `{ publicacionId }`                                 | todos (para quitarla de las listas) |
 | `reaccion:actualizada`     | `{ publicacionId, reacciones }`                     | sala `publicacion:<id>`             |
 | `comentario:nuevo`         | `Comentario`                                        | sala `publicacion:<id>`             |
 | `amistad:solicitud`        | `{ id, usuario, creadaEn }` (usuario = quien envía) | `usuario:<destinatario>`            |

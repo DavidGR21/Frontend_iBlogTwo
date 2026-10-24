@@ -38,3 +38,11 @@ export async function subirImagen(archivo, destino) {
 
   return api.post(`/archivos/${archivoId}/confirmar`);
 }
+
+/**
+ * Borra del bucket imágenes ya subidas que al final no se usaron (p. ej. si falló crear la
+ * publicación). Nunca lanza: si falla, la limpieza periódica del backend las borrará.
+ */
+export async function descartarImagenes(ids) {
+  await Promise.all(ids.map((id) => api.delete(`/archivos/${id}`).catch(() => null)));
+}

@@ -1,7 +1,8 @@
 /** Mapa de pantallas de la aplicación. */
 import { Route, Routes } from 'react-router';
 import { Layout } from './componentes/Layout.jsx';
-import { RutaInvitado, RutaPrivada } from './componentes/Rutas.jsx';
+import { RutaAdmin, RutaInvitado, RutaPrivada } from './componentes/Rutas.jsx';
+import { Admin } from './paginas/Admin.jsx';
 import { Ajustes } from './paginas/Ajustes.jsx';
 import { Amigos } from './paginas/Amigos.jsx';
 import { DetallePublicacion } from './paginas/DetallePublicacion.jsx';
@@ -44,6 +45,11 @@ export function App() {
           <Route path="amigos" element={<Amigos />} />
           <Route path="mensajes" element={<Mensajes />} />
           <Route path="mensajes/:conversacionId" element={<Mensajes />} />
+
+          {/* Solo administradores */}
+          <Route element={<RutaAdmin />}>
+            <Route path="admin" element={<Admin />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NoEncontrado />} />
